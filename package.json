@@ -1,0 +1,33 @@
+{
+  "name": "face-recognition-ico",
+  "version": "0.0.1",
+  "description": "A set of Smart Contracts for ICO",
+  "main": "truffle migrate",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/truffle test",
+    "coverage": "sh coverage.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:dophp/face-recognition-ico.git"
+  },
+  "keywords": [
+    "smart contracts",
+    "solidity",
+    "ethereum"
+  ],
+  "author": "Kirill Beresnev <derainberk@gmail.com>",
+  "license": "WTFPL",
+  "dependencies": {
+    "truffle": "3.4.11",
+    "zeppelin-solidity": "1.3.0"
+  },
+  "devDependencies": {
+    "ethereumjs-testrpc": "4.1.3",
+    "solcheck": "^0.1.3",
+    "solidity-coverage": "^0.2.5"
+  }
+}
