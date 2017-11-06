@@ -2,19 +2,24 @@
 1. Install nodejs and npm
 2. Install project dependencies: `npm install`
 
+##Start truffle develop mode
+`npm run develop`  
+
 ## Run testrpc (do it in a separate bash session). You will need this one before you start testing.
 `sh testrpc.sh` or `./node_modules/.bin/testrpc`   
 (in the first case you will get predefined set of accounts suitable for the all test case)
 
 ## Run full test suite
-`./node_modules/.bin/truffle test`
+`npm run test`
 
 ## Run specified test
 `./node_modules/.bin/truffle test ./test/RNTMultiSigWallet.js`
 
 ## Generate test coverage report
-`sh coverage.sh` or `./node_modules/.bin/solidity-coverage`   
-(in the second case you should start testrpc manually)  
+`npm run coverage`   
+  
+## Compile the smart contracts
+`npm run compile`  
 
 ## Run Solium linter
 `./node_modules/.bin/solium --dir ./contracts`  
