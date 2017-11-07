@@ -18,15 +18,17 @@ contract ERC223BasicToken is StandardToken {
      *
      * @param _to    Receiver address.
      * @param _value Amount of tokens that will be transferred.
+     * @param _data bytes additional data for token fallback
+     * @return bool is succed
      */
-    function transfer(address _to, uint256 _value) public returns (bool) {
+    function transfer(address _to, uint256 _value, bytes _data) public returns (bool) {
         require(_to != address(0));
         require(_value <= balances[msg.sender]);
       
         balances[msg.sender] = balances[msg.sender].sub(_value);
         balances[_to] = balances[_to].add(_value);
         
-        tryContractTokenFallback(_to, msg.sender, _value);
+        tryContractTokenFallback(_to, msg.sender, _value, _data);
         
         Transfer(msg.sender, _to, _value);
         return true;
@@ -37,13 +39,15 @@ contract ERC223BasicToken is StandardToken {
     * @param _from address The address which you want to send tokens from
     * @param _to address The address which you want to transfer to
     * @param _value uint256 the amount of tokens to be transferred
+    * @param _data bytes additional data for token fallback
+    * @return bool is succeed
     */
-   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+   function transferFrom(address _from, address _to, uint256 _value, bytes _data) public returns (bool) {
        require(_to != address(0));
        require(_value <= balances[_from]);
        require(_value <= allowed[_from][msg.sender]);
 
-       tryContractTokenFallback(_to, _from, _value);
+       tryContractTokenFallback(_to, _from, _value, _data);
 
        balances[_from] = balances[_from].sub(_value);
        balances[_to] = balances[_to].add(_value);
@@ -51,15 +55,26 @@ contract ERC223BasicToken is StandardToken {
        Transfer(_from, _to, _value);
        return true;
    }
-   
-   function tryContractTokenFallback(address _to, address _from, uint256 _value) private {
+
+    /**
+    * @dev Try to call token fallback if receiver is contract
+    * @param _to address The address which you want to transfer to
+    * @param _from address The address which you want to send tokens from
+    * @param _value uint256 the amount of tokens to be transferred
+    * @param _data bytes additional data for token fallback
+    */
+   function tryContractTokenFallback(address _to, address _from, uint256 _value, bytes _data) internal {
      if (isContract(_to)) {
          ERC223ReceivingContract receiver = ERC223ReceivingContract(_to);
-         receiver.tokenFallback(_from, _value);
+         receiver.tokenFallback(_from, _value, _data);
      }
    }
-    
-   function isContract(address _addr) private returns (bool) {
+
+    /**
+    * @dev Check is passed address is contract
+    * @param _addr address The address which you want to check
+    */
+   function isContract(address _addr) internal returns (bool) {
        uint256 length;
        assembly {
          //retrieve the size of the code on target address, this needs assembly

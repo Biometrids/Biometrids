@@ -3,8 +3,10 @@ const MockContract = artifacts.require('mocks/MockContract.sol');
 const ERC223MockContract = artifacts.require('mocks/ERC223MockContract.sol');
 
 const web3 = BiometridsToken.web3;
+const web3Abi = require('web3-eth-abi');
 
 const expectThrow = require('./helpers/expectThrow');
+
 
 const tokenName = 'Biometrids Token';
 const tokenSymbol = 'IDS';
@@ -27,6 +29,66 @@ contract('BiometridsToken', function (accounts) {
     let instance;
     const owner = accounts[0];
     const thirdSender = accounts[3];
+
+    const overloadedTransferFromAbi = {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_from",
+                "type": "address"
+            },
+            {
+                "name": "_to",
+                "type": "address"
+            },
+            {
+                "name": "_value",
+                "type": "uint256"
+            },
+            {
+                "name": "_data",
+                "type": "bytes"
+            }
+        ],
+        "name": "transferFrom",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    };
+
+    const overloadedTransferAbi = {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_to",
+                "type": "address"
+            },
+            {
+                "name": "_value",
+                "type": "uint256"
+            },
+            {
+                "name": "_data",
+                "type": "bytes"
+            }
+        ],
+        "name": "transfer",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    };
 
     beforeEach(async () => {
         instance = await deployToken();
@@ -56,15 +118,15 @@ contract('BiometridsToken', function (accounts) {
             await instance.transfer(accounts[2], tokensToSend);
             const recipientBalance = await instance.balanceOf(accounts[2]);
             const senderBalance = await instance.balanceOf(owner);
-            
+
             assert.equal(
-              recipientBalance.toString(),
-              tokensToSend.toString()
+                recipientBalance.toString(),
+                tokensToSend.toString()
             );
-            
+
             assert.equal(
-              senderBalance.toString(),
-              initialSupply.minus(tokensToSend).toString()
+                senderBalance.toString(),
+                initialSupply.minus(tokensToSend).toString()
             );
         } catch (err) {
             assert(false, err.message);
@@ -76,7 +138,7 @@ contract('BiometridsToken', function (accounts) {
     it('Check that account can not transfer more tokens then have', async function () {
         try {
             await instance.transfer(accounts[2], 100, {from: owner});
-    
+
             expectThrow(
                 instance.transfer(accounts[3], 102, {from: accounts[2]})
             )
@@ -84,7 +146,7 @@ contract('BiometridsToken', function (accounts) {
             assert(false, err.message)
         }
     });
-    
+
     it('Check account balance', async function () {
         try {
             await instance.transfer(accounts[2], 100, {from: owner});
@@ -94,7 +156,7 @@ contract('BiometridsToken', function (accounts) {
             assert(false, err.message);
         }
     });
-    
+
     // transferFrom()
     it('Check that account can transfer approved tokens', async function () {
         try {
@@ -107,18 +169,18 @@ contract('BiometridsToken', function (accounts) {
             assert(false, err.message);
         }
     });
-    
+
     it('Check that tokens can be approved', async function () {
         try {
             const tokensForApprove = 666;
             assert.ok(
                 await instance.approve(accounts[3], tokensForApprove, {from: owner})
-        );
+            );
         } catch (err) {
             assert(false, err.message);
         }
     });
-    
+
     // balanceOf()
     it('Check balance of owner account', async function () {
         try {
@@ -128,11 +190,11 @@ contract('BiometridsToken', function (accounts) {
             assert(false, err.message);
         }
     });
-    
+
     it('Check that account can not transfer unapproved tokens', async function () {
         try {
             const expectedBalance = 66;
-    
+
             expectThrow(
                 instance.transferFrom(owner, accounts[2], expectedBalance, {from: accounts[1]})
             )
@@ -140,7 +202,7 @@ contract('BiometridsToken', function (accounts) {
             assert(false, err.message);
         }
     });
-    
+
     it('Check that approved tokens are allowed', async function () {
         try {
             const tokensForApprove = 666;
@@ -151,7 +213,7 @@ contract('BiometridsToken', function (accounts) {
             assert(false, err.message);
         }
     });
-    
+
     it('Check that account without approved tokens have zero allowed tokens', async function () {
         try {
             const allowed = await instance.allowance(owner, accounts[1]);
@@ -160,41 +222,86 @@ contract('BiometridsToken', function (accounts) {
             assert(false, err.message);
         }
     });
-    
+
     it('Check that tokens could NOT be sent to contracts without tokenFallback impementation', async function () {
         try {
             const tokensToSend = web3.toBigNumber('1e20');
             let mockContractInstance = await deployMock();
             assert.ok(mockContractInstance);
-            
-            expectThrow(
-                instance.transfer(mockContractInstance.address, tokensToSend)
+
+            const transferMethodTransactionData = web3Abi.encodeFunctionCall(
+                overloadedTransferAbi,
+                [
+                    mockContractInstance.address,
+                    tokensToSend,
+                    "0x00"
+                ]
             );
-            
-            expectThrow(
-                instance.transferFrom(owner, mockContractInstance.address, tokensToSend)
-            );
+
+            web3.eth.sendTransaction({from: owner, to: instance.address, data: transferMethodTransactionData, value: 0});
         } catch (err) {
-            assert(false, err.message);
+            assert(true);
         }
     });
-    
+
+    it('Check that tokens could NOT be sent to contracts without tokenFallback impementation (transferFrom method)', async function () {
+        try {
+            const tokensToSend = web3.toBigNumber('1e20');
+            let mockContractInstance = await deployMock();
+            assert.ok(mockContractInstance);
+
+            const transferFromMethodTransactionData = web3Abi.encodeFunctionCall(
+                overloadedTransferFromAbi,
+                [
+                    owner,
+                    mockContractInstance.address,
+                    tokensToSend,
+                    "0x00"
+                ]
+            );
+
+            web3.eth.sendTransaction({from: owner, to: instance.address, data: transferFromMethodTransactionData, value: 0})
+        } catch (err) {
+            assert(true);
+        }
+    });
+
     it('Check that tokens could be sent to contracts which implemented tokenFallback for ERC223 compatibility', async function () {
         try {
             const tokensToSend = web3.toBigNumber('1e20');
             let mockContractInstance = await deployERC223Mock();
             assert.ok(mockContractInstance);
-            
-            await instance.transfer(mockContractInstance.address, tokensToSend);
-    
+
+            const transferMethodTransactionData = web3Abi.encodeFunctionCall(
+                overloadedTransferAbi,
+                [
+                    mockContractInstance.address,
+                    tokensToSend,
+                    "0x00"
+                ]
+            );
+
+            await web3.eth.sendTransaction({from: owner, to: instance.address, data: transferMethodTransactionData, value: 0});
+
             assert.equal(
                 (await instance.balanceOf(mockContractInstance.address)).toString(),
                 tokensToSend.toString()
             );
-    
+
+
+            const transferFromMethodTransactionData = web3Abi.encodeFunctionCall(
+                overloadedTransferFromAbi,
+                [
+                    owner,
+                    mockContractInstance.address,
+                    tokensToSend,
+                    "0x00"
+                ]
+            );
+
             await instance.approve(thirdSender, tokensToSend, {from: owner});
-            await instance.transferFrom(owner, mockContractInstance.address, tokensToSend, {from: thirdSender});
-            
+            await web3.eth.sendTransaction({from: thirdSender, to: instance.address, data: transferFromMethodTransactionData, value: 0});
+
             assert.equal(
                 (await instance.balanceOf(mockContractInstance.address)).toString(),
                 tokensToSend.add(tokensToSend).toString()
