@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "run-tests": "sh run-tests.sh",
+    "tests": "sh run-tests.sh",
     "test": "./node_modules/.bin/truffle test",
     "coverage": "sh coverage.sh",
     "compile": "./node_modules/.bin/truffle compile",

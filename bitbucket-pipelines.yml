@@ -13,4 +13,4 @@ pipelines:
         script: 
           - npm install
           - npm run compile
-          - sh run-tests.sh
+          - npm run tests
