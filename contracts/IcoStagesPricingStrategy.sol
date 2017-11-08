@@ -83,14 +83,17 @@ contract IcoStagesPricingStrategy is IcoStagesPricingStrategyInterface, OnlyAllo
     function calculateTokenAmount(uint256 _weiSent, uint256 _decimals) public constant returns (uint256 tokens)
     {
         require(strategyInitialized());
-//        uint256 multiplier = 10 ** _decimals;
-//        tokens = _weiSent.mul(multiplier) / oneTokenInWei;
+
+        uint256 multiplier = 10 ** _decimals;
+        uint8 activeWeekIndex = getActiveWeekIndex();
+
+        tokens = _weiSent.mul(multiplier) / stageWeeks[activeWeekIndex].oneTokenInWei;
     }
 
     /**
-     * @dev Get index of current week or fallback to zero week
+     * @dev Get index of current active week or fallback to zero week
      */
-    function getCurrentPhaseIndex() public constant returns (uint8 stageWeekIndex) {
+    function getActiveWeekIndex() public constant returns (uint8 stageWeekIndex) {
         stageWeekIndex = 0;
         for (uint8 i = 0; i < stageWeeks.length; i++) {
             if (now <= stageWeeks[i].endTime) {
@@ -105,14 +108,14 @@ contract IcoStagesPricingStrategy is IcoStagesPricingStrategyInterface, OnlyAllo
      * @return Array of current phase properties
      */
     function getCurrentWeekAttributes() public constant returns (uint256 endTime, uint256 oneTokenInWei) {
-        return getWeekAttributes(getCurrentPhaseIndex());
+        return getWeekAttributes(getActiveWeekIndex());
     }
 
     /**
      * @dev Get selected week attributes
      * @return Array of current phase properties
      */
-    function getWeekAttributes(uint _weekIndex) public constant returns (uint256 endTime, uint256 oneTokenInWei) {
+    function getWeekAttributes(uint8 _weekIndex) public constant returns (uint256 endTime, uint256 oneTokenInWei) {
         require(_weekIndex <= stageWeeksCount);
 
         return (

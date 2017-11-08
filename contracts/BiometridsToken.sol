@@ -9,10 +9,10 @@ contract BiometridsToken is ERC223BasicToken, HasNoEther {
     string public constant symbol = "IDS";
 
     /** Decimals part of the token. The same as Wei (minimal part of the Ether) */
-    uint256 public constant decimals = 18;
+    uint256 public constant decimals = 1;
 
     /* 1B of tokens will be issued with decimals **/
-    uint256 public totalSupply = 10 ** (8 + 18);
+    uint256 public totalSupply = 10 ** (8 + 1);
 
     function BiometridsToken() public {
         balances[msg.sender] = totalSupply;

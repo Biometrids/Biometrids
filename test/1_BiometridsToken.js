@@ -10,8 +10,8 @@ const expectThrow = require('./helpers/expectThrow');
 
 const tokenName = 'Biometrids Token';
 const tokenSymbol = 'IDS';
-const initialSupply = web3.toBigNumber('1e+26');
-const decimals = web3.toBigNumber('18');
+const initialSupply = web3.toBigNumber('1000000000');
+const decimals = 1;
 
 async function deployToken() {
     return BiometridsToken.new();
@@ -114,7 +114,7 @@ contract('BiometridsToken', function (accounts) {
 
     it('Check that tokens can be transfered', async function () {
         try {
-            const tokensToSend = web3.toBigNumber('1e20');
+            const tokensToSend = web3.toBigNumber('400');
             await instance.transfer(accounts[2], tokensToSend);
             const recipientBalance = await instance.balanceOf(accounts[2]);
             const senderBalance = await instance.balanceOf(owner);
@@ -225,7 +225,7 @@ contract('BiometridsToken', function (accounts) {
 
     it('Check that tokens could NOT be sent to contracts without tokenFallback impementation', async function () {
         try {
-            const tokensToSend = web3.toBigNumber('1e20');
+            const tokensToSend = web3.toBigNumber('400');
             let mockContractInstance = await deployMock();
             assert.ok(mockContractInstance);
 
@@ -246,7 +246,7 @@ contract('BiometridsToken', function (accounts) {
 
     it('Check that tokens could NOT be sent to contracts without tokenFallback impementation (transferFrom method)', async function () {
         try {
-            const tokensToSend = web3.toBigNumber('1e20');
+            const tokensToSend = web3.toBigNumber('400');
             let mockContractInstance = await deployMock();
             assert.ok(mockContractInstance);
 
@@ -268,7 +268,7 @@ contract('BiometridsToken', function (accounts) {
 
     it('Check that tokens could be sent to contracts which implemented tokenFallback for ERC223 compatibility', async function () {
         try {
-            const tokensToSend = web3.toBigNumber('1e20');
+            const tokensToSend = web3.toBigNumber('400');
             let mockContractInstance = await deployERC223Mock();
             assert.ok(mockContractInstance);
 
