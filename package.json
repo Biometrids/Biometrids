@@ -1,6 +1,6 @@
 {
   "name": "face-recognition-ico",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "A set of Smart Contracts for ICO",
   "main": "truffle migrate",
   "directories": {

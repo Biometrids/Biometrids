@@ -1,13 +1,13 @@
-const PreSalePricingStrategy = artifacts.require('PreSalePricingStrategy.sol');
-const web3 = PreSalePricingStrategy.web3;
+const PreIcoPricingStrategy = artifacts.require('PreIcoPricingStrategy.sol');
+const web3 = PreIcoPricingStrategy.web3;
 
 const expectThrow = require('./helpers/expectThrow');
 
 async function deployStrategy() {
-    return PreSalePricingStrategy.new();
+    return PreIcoPricingStrategy.new();
 }
 
-contract('PreSalePricingStrategy', function (accounts) {
+contract('PreIcoPricingStrategy', function (accounts) {
     let instance;
 
     const tokenDecimals = 1;

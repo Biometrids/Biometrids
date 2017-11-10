@@ -6,7 +6,7 @@ import "../node_modules/zeppelin-solidity/contracts/ownership/HasNoEther.sol";
 import "./interfaces/PricingStrategyInterface.sol";
 
 
-contract PreSalePricingStrategy is PricingStrategyInterface, HasNoEther {
+contract PreIcoPricingStrategy is PricingStrategyInterface, HasNoEther {
     using SafeMath for uint256;
 
     /** 910 IDS for 1 ether */
@@ -16,6 +16,18 @@ contract PreSalePricingStrategy is PricingStrategyInterface, HasNoEther {
      * @dev Interface method for checking pricing strategy
      */
     function isPricingStrategy() public constant returns (bool) {
+        return true;
+    }
+
+    /**
+     * @dev Fallback for interface compatibility
+     */
+    function initPricingStrategy(uint256 _startingTimestamp) public {}
+
+    /**
+     * @dev This is static strategy initialized by default
+     */
+    function strategyInitialized() public constant returns (bool) {
         return true;
     }
 

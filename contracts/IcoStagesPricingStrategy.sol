@@ -3,11 +3,11 @@ pragma solidity 0.4.18;
 
 import "../node_modules/zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../node_modules/zeppelin-solidity/contracts/ownership/HasNoEther.sol";
-import "./interfaces/IcoStagesPricingStrategyInterface.sol";
+import "./interfaces/PricingStrategyInterface.sol";
 import "./library/OnlyAllowedAddresses.sol";
 
 
-contract IcoStagesPricingStrategy is IcoStagesPricingStrategyInterface, OnlyAllowedAddresses, HasNoEther {
+contract IcoStagesPricingStrategy is PricingStrategyInterface, OnlyAllowedAddresses, HasNoEther {
     using SafeMath for uint256;
 
     struct StageWeek {
