@@ -3,7 +3,7 @@ pragma solidity 0.4.18;
 import "./PreIcoFinalizeAgent.sol";
 
 contract PreIcoFinalizeAgentTest is PreIcoFinalizeAgent {
-    function PreIcoFinalizeAgentTest(CrowdSaleInterface _crowdSale, PricingStrategyInterface _icoPricingStrategy)
+    function PreIcoFinalizeAgentTest(BaseCrowdSale _crowdSale, PricingStrategyInterface _icoPricingStrategy)
              PreIcoFinalizeAgent(_crowdSale, _icoPricingStrategy) public {}
 
     /**
