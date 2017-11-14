@@ -2,12 +2,12 @@ pragma solidity 0.4.18;
 
 
 import "./interfaces/FinalizeAgentInterface.sol";
-import "./BaseCrowdSale.sol";
+import "./interfaces/CrowdSaleInterface.sol";
 import "./interfaces/PricingStrategyInterface.sol";
 
 
 contract PreIcoFinalizeAgent is FinalizeAgentInterface {
-    BaseCrowdSale public crowdSale;
+    CrowdSaleInterface public crowdSale;
 
     PricingStrategyInterface public icoStagesPricingStrategy;
 
@@ -16,9 +16,12 @@ contract PreIcoFinalizeAgent is FinalizeAgentInterface {
         _;
     }
 
-    function PreIcoFinalizeAgent(BaseCrowdSale _crowdSale, PricingStrategyInterface _icoPricingStrategy) public {
+    function PreIcoFinalizeAgent(CrowdSaleInterface _crowdSale, PricingStrategyInterface _icoPricingStrategy) public {
         crowdSale = _crowdSale;
+        require(crowdSale.isCrowdSale());
+
         icoStagesPricingStrategy = _icoPricingStrategy;
+        require(icoStagesPricingStrategy.isPricingStrategy());
     }
 
     /**
@@ -27,5 +30,12 @@ contract PreIcoFinalizeAgent is FinalizeAgentInterface {
      */
     function finalize() onlyCrowdSale public {
         crowdSale.setPricingStrategy(icoStagesPricingStrategy);
+    }
+
+    /**
+     * @dev Interface method for checking finalize agent
+     */
+    function isFinalizeAgent() public constant returns (bool) {
+        return true;
     }
 }

@@ -1,20 +1,30 @@
 pragma solidity 0.4.18;
 
+
+import "./interfaces/TokenInterface.sol";
 import "./library/ERC233/ERC223BasicToken.sol";
 import "../node_modules/zeppelin-solidity/contracts/ownership/HasNoEther.sol";
 
-contract BiometridsToken is ERC223BasicToken, HasNoEther {
-    string public constant name = "Biometrids Token";
 
-    string public constant symbol = "IDS";
-
-    /** Decimals part of the token. The same as Wei (minimal part of the Ether) */
-    uint256 public constant decimals = 1;
-
-    /* 1B of tokens will be issued with decimals **/
-    uint256 public totalSupply = 10 ** (8 + 1);
-
+contract BiometridsToken is TokenInterface, ERC223BasicToken, HasNoEther {
     function BiometridsToken() public {
+        totalSupply = 10 ** (8 + decimals());
         balances[msg.sender] = totalSupply;
+    }
+
+    function name() public constant returns (string) {
+        return "Biometrids Token";
+    }
+
+    function symbol() public constant returns (string) {
+        return "IDS";
+    }
+
+    function decimals() public constant returns (uint256) {
+        return 1;
+    }
+
+    function isToken() public constant returns (bool) {
+        return true;
     }
 }

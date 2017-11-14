@@ -1,6 +1,6 @@
 const BiometridsToken = artifacts.require('BiometridsToken.sol');
-const MockContract = artifacts.require('mocks/MockContract.sol');
-const ERC223MockContract = artifacts.require('mocks/ERC223MockContract.sol');
+const MockContract = artifacts.require('./mocks/MockContract.sol');
+const ERC223MockContract = artifacts.require('./mocks/ERC223MockContract.sol');
 
 const web3 = BiometridsToken.web3;
 const web3Abi = require('web3-eth-abi');
@@ -103,7 +103,7 @@ contract('BiometridsToken', function (accounts) {
             );
             assert.equal(
                 (await instance.decimals()).toString(),
-                decimals.toString()
+                decimals
             );
             assert.equal((await instance.name()), tokenName);
             assert.equal((await instance.symbol()), tokenSymbol);
