@@ -13,15 +13,15 @@ contract CrowdSaleInterface {
 
     function setICOFinalizeAgent(FinalizeAgentInterface _icoFinalizeAgent) public;
 
-    function startPreIco() public returns (bool);
+    function startPreIco() public;
 
-    function finalizePreIco() public returns (bool);
+    function finalizePreIco() public;
 
-    function startIco() public returns (bool);
+    function startIco() public;
 
-    function finalizeIco() public returns (bool);
+    function finalizeIco() public;
 
-    function invest() public returns (bool);
+    function invest() payable;
 
     function isReachedSoftCap() public constant returns (bool);
 
