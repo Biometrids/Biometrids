@@ -10,6 +10,5 @@ module.exports = async function (deployer) {
     const walletAddress = '0xb9dcbf8a52edc0c8dd9983fcc1d97b1f5d975ed7';
 
     deployer.deploy(CrowdSale, BiometridsToken.address, walletAddress, PreIcoPricingStrategy.address);
-    deployer.link(CrowdSale, PreIcoFinalizeAgent);
-    deployer.link(CrowdSale, IcoFinalizeAgent);
+    deployer.link(CrowdSale, [PreIcoFinalizeAgent, IcoFinalizeAgent]);
 };
