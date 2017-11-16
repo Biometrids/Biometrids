@@ -38,8 +38,8 @@ contract IcoFinalizeAgent is FinalizeAgentInterface {
     }
 
     /**
-         * @dev Interface method for checking finalize agent
-         */
+     * @dev Interface method for checking finalize agent
+     */
     function isFinalizeAgent() public constant returns (bool) {
         return true;
     }

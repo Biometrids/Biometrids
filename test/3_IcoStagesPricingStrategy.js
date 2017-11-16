@@ -2,7 +2,6 @@ const IcoStagesPricingStrategy = artifacts.require('IcoStagesPricingStrategy.sol
 const web3 = IcoStagesPricingStrategy.web3;
 
 const moment = require('moment');
-const expectThrow = require('./helpers/expectThrow');
 
 async function deployStrategy() {
     return IcoStagesPricingStrategy.new();

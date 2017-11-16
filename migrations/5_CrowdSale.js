@@ -7,7 +7,7 @@ const IcoFinalizeAgent = artifacts.require('IcoFinalizeAgent.sol');
 
 module.exports = async function (deployer) {
     //todo Change wallet address. Should not be that same as contracts owner
-    const walletAddress = '0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501204';
+    const walletAddress = '0xb9dcbf8a52edc0c8dd9983fcc1d97b1f5d975ed7';
 
     deployer.deploy(CrowdSale, BiometridsToken.address, walletAddress, PreIcoPricingStrategy.address);
     deployer.link(CrowdSale, PreIcoFinalizeAgent);

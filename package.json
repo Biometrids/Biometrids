@@ -9,8 +9,8 @@
   "scripts": {
     "tests": "sh run-tests.sh",
     "test": "./node_modules/.bin/truffle test",
-    "coverage": "sh coverage.sh",
     "compile": "./node_modules/.bin/truffle compile",
+    "migrate": "./node_modules/.bin/truffle migrate",
     "develop": "./node_modules/.bin/truffle develop",
     "testrpc": "sh testrpc.sh"
   },
@@ -35,7 +35,7 @@
     "babel-preset-stage-2": "^6.18.0",
     "babel-preset-stage-3": "^6.17.0",
     "babel-register": "^6.23.0",
-    "ethereumjs-testrpc": "6.0.1",
+    "ethereumjs-testrpc": "6.0.3",
     "moment": "^2.19.1",
     "momentjs": "^2.0.0",
     "solcheck": "^0.1.3",
