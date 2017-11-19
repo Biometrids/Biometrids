@@ -3,6 +3,8 @@ const CrowdSale = artifacts.require('CrowdSale.sol');
 const IcoStagesPricingStrategy = artifacts.require('IcoStagesPricingStrategy.sol');
 const PreIcoPricingStrategy = artifacts.require('PreIcoPricingStrategy.sol');
 const BiometridsToken = artifacts.require('BiometridsToken.sol');
+const CrowdSaleRefundVault = artifacts.require('CrowdSaleRefundVault.sol');
+
 
 async function deployCrowdSale(token, wallet, pricingStrategy) {
     return CrowdSale.new(token, wallet, pricingStrategy);
@@ -24,12 +26,17 @@ async function deployToken() {
     return BiometridsToken.new();
 }
 
+async function deployRefundVault(wallet) {
+    return CrowdSaleRefundVault.new(wallet);
+}
+
 contract('PreIcoFinalizeAgentTest', function (accounts) {
     let finalizeAgentInstance;
     let crowdSaleInstance;
     let icoPricingStrategyInstance;
     let preIcoPricingStrategyInstance;
     let tokenInstance;
+    let refundVaultInstance;
 
     const wallet = accounts[5];
 
@@ -37,13 +44,16 @@ contract('PreIcoFinalizeAgentTest', function (accounts) {
         tokenInstance = await deployToken();
         assert.ok(tokenInstance);
 
+        refundVaultInstance = await deployRefundVault(wallet);
+        assert.ok(refundVaultInstance);
+
         preIcoPricingStrategyInstance = await deployPreIcoPricingStrategy();
         assert.ok(preIcoPricingStrategyInstance);
 
         crowdSaleInstance =
             await deployCrowdSale(
                 tokenInstance.address,
-                wallet,
+                refundVaultInstance.address,
                 preIcoPricingStrategyInstance.address
             );
         assert.ok(crowdSaleInstance);
@@ -62,7 +72,7 @@ contract('PreIcoFinalizeAgentTest', function (accounts) {
         try {
             await finalizeAgentInstance.finalize();
             assert.equal(
-                await finalizeAgentInstance.pricingStrategy(),
+                await crowdSaleInstance.pricingStrategy(),
                 icoPricingStrategyInstance.address
             );
         } catch (err) {

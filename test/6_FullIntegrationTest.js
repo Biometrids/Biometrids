@@ -63,7 +63,7 @@ const setupCrowdSale = async () => {
     crowdSaleInstance = await CrowdSale.deployed();
     preIcoFinalizeAgentInstance = await PreIcoFinalizeAgent.deployed();
     refundVaultInstance = await CrowdSaleRefundVault.deployed();
-    
+
     icoFinalizeAgentInstance = await IcoFinalizeAgent.new(crowdSaleInstance.address, refundVaultInstance.address);
 
     //We are using the same module as for migrations
@@ -324,4 +324,31 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
         await crowdSaleInstance.claimRefund().should.be.rejectedWith(EVMRevert);
         await crowdSaleInstance.invest({value: ether(1), from: investor}).should.be.rejectedWith(EVMRevert);
     });
+});
+
+contract('CrowdSale - Invest with Failed flow', function ([owner, investor]) {
+    before(async function () {
+        await advanceBlock();
+        await setupCrowdSale();
+    });
+
+    it('Fail the crowdsale and get refund', async function () {
+        await crowdSaleInstance.startPreIco();
+        await crowdSaleInstance.invest({value: ether(1), from: investor});
+        await increaseTimeTo(moment(latestTime(), 'X').add({weeks: 4, days: 1}).unix());
+
+        await crowdSaleInstance.finalizePreIco();
+
+        await increaseTimeTo(moment(latestTime(), 'X').add({days: 15}).unix());
+        await crowdSaleInstance.startIco();
+        await crowdSaleInstance.invest({value: ether(2), from: investor});
+        const initialVaultBalance = await web3.eth.getBalance(refundVaultInstance.address);
+
+        await increaseTimeTo(moment(latestTime(), 'X').add({weeks: 4, days: 1}).unix());
+        await crowdSaleInstance.finalizeIco();
+        await crowdSaleInstance.claimRefund({from: investor});
+
+        (await web3.eth.getBalance(refundVaultInstance.address))
+            .should.be.bignumber.not.equal(initialVaultBalance);
+    })
 });

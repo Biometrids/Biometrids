@@ -5,12 +5,12 @@ const ERC223MockContract = artifacts.require('./mocks/ERC223MockContract.sol');
 const web3 = BiometridsToken.web3;
 const web3Abi = require('web3-eth-abi');
 
-const expectThrow = require('./helpers/expectThrow');
+import expectThrow from './helpers/expectThrow';
 
 
 const tokenName = 'Biometrids Token';
 const tokenSymbol = 'IDS';
-const initialSupply = web3.toBigNumber('1000000000');
+const initialSupply = web3.toBigNumber('1e26');
 const decimals = 18;
 
 async function deployToken() {

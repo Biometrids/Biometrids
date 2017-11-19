@@ -20,6 +20,10 @@ async function deployToken() {
     return BiometridsToken.new();
 }
 
+async function deployRefundVault(wallet) {
+    return CrowdSaleRefundVault.new(wallet);
+}
+
 contract('IcoFinalizeAgentTest', function (accounts) {
     let finalizeAgentInstance;
     let crowdSaleInstance;
@@ -42,20 +46,22 @@ contract('IcoFinalizeAgentTest', function (accounts) {
         icoPricingStrategyInstance = await deployIcoStagesPricingStrategy();
         assert.ok(icoPricingStrategyInstance);
 
+        refundVaultInstance = await deployRefundVault(wallet);
+        assert.ok(refundVaultInstance);
+
         crowdSaleInstance =
             await deployCrowdSale(
                 tokenInstance.address,
-                wallet,
+                refundVaultInstance.address,
                 icoPricingStrategyInstance.address
             );
         assert.ok(crowdSaleInstance);
 
-        finalizeAgentInstance = await deployFinalizeAgent(crowdSaleInstance.address, wallet);
+        finalizeAgentInstance = await deployFinalizeAgent(crowdSaleInstance.address, refundVaultInstance.address);
         assert.ok(finalizeAgentInstance);
 
-        refundVaultInstance = await CrowdSaleRefundVault.at(
-            await finalizeAgentInstance.refundVault()
-        );
+        await refundVaultInstance.allowAddress(finalizeAgentInstance.address, true);
+        await refundVaultInstance.allowAddress(crowdSaleInstance.address, true);
     });
 
     it('Check that the refund vault in refunding state if soft cap was NOT reached', async function () {
@@ -63,9 +69,10 @@ contract('IcoFinalizeAgentTest', function (accounts) {
             await finalizeAgentInstance.finalize();
 
             assert.equal(
-                await refundVaultInstance.state(),
+                (await refundVaultInstance.state()).toString(),
                 refundVaultStates['Refunding']
-            )
+            );
+
         } catch (err) {
             assert(false, err.message)
         }
@@ -77,7 +84,7 @@ contract('IcoFinalizeAgentTest', function (accounts) {
             await finalizeAgentInstance.finalize();
 
             assert.equal(
-                await refundVaultInstance.state(),
+                (await refundVaultInstance.state()).toString(),
                 refundVaultStates['Closed']
             )
         } catch (err) {

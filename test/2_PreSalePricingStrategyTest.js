@@ -1,7 +1,7 @@
 const PreIcoPricingStrategy = artifacts.require('PreIcoPricingStrategy.sol');
 const web3 = PreIcoPricingStrategy.web3;
 
-const expectThrow = require('./helpers/expectThrow');
+import expectThrow from './helpers/expectThrow';
 
 async function deployStrategy() {
     return PreIcoPricingStrategy.new();
@@ -37,7 +37,7 @@ contract('PreIcoPricingStrategy', function (accounts) {
             /** Send wei amount for the 1 token */
             const weiToSend = web3.toBigNumber(web3.toWei(1, 'ether')).divToInt(910);
             /** One token received with 18 decimals */
-            let tokensReceived = web3.toBigNumber('10');
+            let tokensReceived = web3.toBigNumber('1e18');
 
             assert.equal(
                 (await instance.calculateTokenAmount(weiToSend, tokenDecimals)).toString(),
