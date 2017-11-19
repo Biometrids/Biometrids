@@ -314,6 +314,8 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
     it('Finalize ICO with success', async function () {
         await increaseTimeTo(moment(latestTime(), 'X').add({weeks: 1, days: 2}).unix());
 
+        const initialVaultBalance = (await web3.eth.getBalance(refundVaultInstance.address));
+
         await crowdSaleInstance.finalizeIco();
 
         (await crowdSaleInstance.status()).should.be.bignumber.equal(crowdSaleStates['Success']);
@@ -323,6 +325,10 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
 
         await crowdSaleInstance.claimRefund().should.be.rejectedWith(EVMRevert);
         await crowdSaleInstance.invest({value: ether(1), from: investor}).should.be.rejectedWith(EVMRevert);
+
+        (await web3.eth.getBalance(
+            refundVaultInstance.address
+        )).should.be.bignumber.equal(0);
     });
 });
 

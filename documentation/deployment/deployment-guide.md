@@ -1,5 +1,7 @@
 # Mac OS Deployment Guide       
 
+# Don't forget to change wallet address before deployment. Placed here: `migrations/5_CrowdSaleRefundVault.js`
+
 All commands should be put in Mac OS Terminal application or iTerm
 
 Attach to the geth console reminder: `geth attach ~/Library/Ethereum/geth.ipc`  

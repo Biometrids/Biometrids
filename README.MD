@@ -1,3 +1,5 @@
+# Don't forget to change wallet address before deployment. Placed here: `migrations/5_CrowdSaleRefundVault.js`
+
 ## Install project dependencies
 1. Install nodejs and npm
 2. Install project dependencies: `npm install`
@@ -13,7 +15,7 @@
 `npm run test`
 
 ## Run specified test
-`./node_modules/.bin/truffle test ./test/RNTMultiSigWallet.js`
+`./node_modules/.bin/truffle test ./test/5_CrowdSaleRefundVault.js`
   
 ## Compile the smart contracts
 `npm run compile`    
