@@ -4,9 +4,10 @@ pragma solidity 0.4.18;
 import "./interfaces/RefundVaultInterface.sol";
 import "./interfaces/FinalizeAgentInterface.sol";
 import "./interfaces/CrowdSaleInterface.sol";
+import "../node_modules/zeppelin-solidity/contracts/ownership/HasNoEther.sol";
 
 
-contract IcoFinalizeAgent is FinalizeAgentInterface {
+contract IcoFinalizeAgent is FinalizeAgentInterface, HasNoEther {
     CrowdSaleInterface public crowdSale;
 
     RefundVaultInterface public refundVault;

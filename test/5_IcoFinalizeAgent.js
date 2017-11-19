@@ -87,9 +87,9 @@ contract('IcoFinalizeAgentTest', function (accounts) {
 
     it('Check finalize agent interface', async function () {
         try {
-            // assert.isTrue(
-                await finalizeAgentInstance.isFinalizeAgent();
-            // );
+            assert.isTrue(
+                await finalizeAgentInstance.isFinalizeAgent()
+            );
         } catch (err) {
             assert(false, err.message);
         }

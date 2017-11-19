@@ -10,10 +10,10 @@ async function deployStrategy() {
 contract('PreIcoPricingStrategy', function (accounts) {
     let instance;
 
-    const tokenDecimals = 1;
+    const tokenDecimals = 18;
     const ether = web3.toBigNumber(web3.toWei(1, 'ether'));
     /** 910 IDS for 1 ether */
-    const defaultTokenPrice = ether.div(910);
+    const defaultTokenPrice = ether.divToInt(910);
 
     beforeEach(async () => {
         /** 100 tokens for 1 ether */
@@ -35,7 +35,7 @@ contract('PreIcoPricingStrategy', function (accounts) {
     it('Check calculation of price', async function () {
         try {
             /** Send wei amount for the 1 token */
-            const weiToSend = web3.toBigNumber(web3.toWei(1, 'ether')).div(910);
+            const weiToSend = web3.toBigNumber(web3.toWei(1, 'ether')).divToInt(910);
             /** One token received with 18 decimals */
             let tokensReceived = web3.toBigNumber('10');
 

@@ -39,3 +39,4 @@ fi
 ./node_modules/.bin/truffle test ./test/3_IcoStagesPricingStrategy.js
 ./node_modules/.bin/truffle test ./test/4_PreIcoFinalizeAgent.js
 ./node_modules/.bin/truffle test ./test/5_IcoFinalizeAgent.js
+./node_modules/.bin/truffle test ./test/6_FullIntegrationTest.js

@@ -11,7 +11,7 @@ const expectThrow = require('./helpers/expectThrow');
 const tokenName = 'Biometrids Token';
 const tokenSymbol = 'IDS';
 const initialSupply = web3.toBigNumber('1000000000');
-const decimals = 1;
+const decimals = 18;
 
 async function deployToken() {
     return BiometridsToken.new();

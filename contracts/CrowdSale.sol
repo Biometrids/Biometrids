@@ -2,12 +2,13 @@ pragma solidity 0.4.18;
 
 
 import "./interfaces/CrowdSaleInterface.sol";
+import "./interfaces/RefundVaultInterface.sol";
 import "./library/OnlyAllowedAddresses.sol";
-import "./CrowdSaleRefundVault.sol";
 import "../node_modules/zeppelin-solidity/contracts/math/SafeMath.sol";
+import "../node_modules/zeppelin-solidity/contracts/ownership/Claimable.sol";
 
 
-contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
+contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     using SafeMath for uint256;
 
     /** Minimal value of ether needed */
@@ -56,7 +57,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
     FinalizeAgentInterface public icoFinalizeAgent;
 
     /** Refund Vault use used to store funds until ICO stage will be finished. Then fund will be locked or unlocked for refund. */
-    CrowdSaleRefundVault public refundVault;
+    RefundVaultInterface public refundVault;
 
     /** Token contract */
     TokenInterface public token;
@@ -68,7 +69,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
     enum Status {Unknown, PreIco, PreIcoFinalized, Ico, Success, Failed}
 
     /** CrowdSale current status */
-    Status status = Status.Unknown;
+    Status public status = Status.Unknown;
 
     /**
      * A set of events which could be read from the blockchain
@@ -98,7 +99,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
         require(status == Status.PreIco || status == Status.Ico);
         require(msg.value >= minimalInvestmentValue);
         require(pricingStrategy.strategyInitialized());
-
+        require(!isReachedHardCap());
         /** Don't allow to invest if 7 days passed at PreIco stage */
         if (status == Status.PreIco) {
             require(now <= getPreIcoDeadline());
@@ -106,12 +107,14 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
         _;
     }
 
-    function CrowdSale(TokenInterface _token, address _wallet, PricingStrategyInterface _pricingStrategy) public {
+    function CrowdSale(TokenInterface _token, RefundVaultInterface _refundVault, PricingStrategyInterface _pricingStrategy) public {
         token = _token;
         require(token.isToken());
 
-        wallet = _wallet;
-        refundVault = new CrowdSaleRefundVault(wallet);
+        refundVault = _refundVault;
+        require(refundVault.isRefundVault());
+
+        wallet = refundVault.getWallet();
 
         setPricingStrategy(_pricingStrategy);
     }
@@ -175,7 +178,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
         //Check that at least 7 days passed
         require(now >= getPreIcoDeadline());
 
-        delegateCallFinalize(preIcoFinalizeAgent);
+        preIcoFinalizeAgent.finalize();
 
         status = Status.PreIcoFinalized;
         preIcoFinalizedTimestamp = now;
@@ -189,7 +192,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
     function startIco() onlyAllowedAddresses public {
         require(status == Status.PreIcoFinalized);
         //Check that at least 14 days was passed from the PreIco Deadline (not actual PreICO finalize date)
-        require(now >= getPreIcoDeadline() + 14 days);
+        require(now >= (getPreIcoDeadline() + 14 days));
 
         //Initialize pricing strategy with separated week stages
         pricingStrategy.initPricingStrategy(now);
@@ -207,7 +210,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
         require(status == Status.Ico);
         require(now >= (icoStartedTimestamp + 4 weeks));
 
-        delegateCallFinalize(icoFinalizeAgent);
+        icoFinalizeAgent.finalize();
 
         icoFinalizedTimestamp = now;
 
@@ -300,14 +303,5 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface {
      */
     function assignTokens(address _receiver, uint256 _tokenAmount) private {
         token.transferFrom(owner, _receiver, _tokenAmount);
-    }
-
-    /**
-     * @dev A wrapper for delegating call of finalize methods in finalize agents
-     */
-    function delegateCallFinalize(FinalizeAgentInterface _finalizeAgent) private {
-        require(
-        _finalizeAgent.delegatecall(bytes4(keccak256('finalize()')))
-        );
     }
 }

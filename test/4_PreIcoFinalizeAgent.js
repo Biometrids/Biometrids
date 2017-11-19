@@ -24,7 +24,7 @@ async function deployToken() {
     return BiometridsToken.new();
 }
 
-contract('IcoFinalizeAgentTest', function (accounts) {
+contract('PreIcoFinalizeAgentTest', function (accounts) {
     let finalizeAgentInstance;
     let crowdSaleInstance;
     let icoPricingStrategyInstance;
@@ -62,7 +62,7 @@ contract('IcoFinalizeAgentTest', function (accounts) {
         try {
             await finalizeAgentInstance.finalize();
             assert.equal(
-                await crowdSaleInstance.pricingStrategy(),
+                await finalizeAgentInstance.pricingStrategy(),
                 icoPricingStrategyInstance.address
             );
         } catch (err) {

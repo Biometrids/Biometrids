@@ -4,9 +4,10 @@ pragma solidity 0.4.18;
 import "./interfaces/FinalizeAgentInterface.sol";
 import "./interfaces/CrowdSaleInterface.sol";
 import "./interfaces/PricingStrategyInterface.sol";
+import "../node_modules/zeppelin-solidity/contracts/ownership/HasNoEther.sol";
 
 
-contract PreIcoFinalizeAgent is FinalizeAgentInterface {
+contract PreIcoFinalizeAgent is FinalizeAgentInterface, HasNoEther {
     CrowdSaleInterface public crowdSale;
 
     PricingStrategyInterface public icoStagesPricingStrategy;

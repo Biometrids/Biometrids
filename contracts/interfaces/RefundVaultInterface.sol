@@ -10,5 +10,7 @@ contract RefundVaultInterface {
 
     function refund(address investor) public;
 
+    function getWallet() public constant returns (address);
+
     function isRefundVault() public constant returns (bool);
 }

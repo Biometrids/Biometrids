@@ -4,9 +4,9 @@ pragma solidity 0.4.18;
 import "./interfaces/TokenInterface.sol";
 import "./library/ERC233/ERC223BasicToken.sol";
 import "../node_modules/zeppelin-solidity/contracts/ownership/HasNoEther.sol";
+import "../node_modules/zeppelin-solidity/contracts/ownership/Claimable.sol";
 
-
-contract BiometridsToken is TokenInterface, ERC223BasicToken, HasNoEther {
+contract BiometridsToken is TokenInterface, ERC223BasicToken, HasNoEther, Claimable {
     function BiometridsToken() public {
         totalSupply = 10 ** (8 + decimals());
         balances[msg.sender] = totalSupply;
@@ -21,7 +21,7 @@ contract BiometridsToken is TokenInterface, ERC223BasicToken, HasNoEther {
     }
 
     function decimals() public constant returns (uint256) {
-        return 1;
+        return 18;
     }
 
     function isToken() public constant returns (bool) {

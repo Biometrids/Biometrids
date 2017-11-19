@@ -14,7 +14,7 @@ contract('IcoStagesPricingStrategy', function (accounts) {
     const thirdPartyAddress = accounts[3];
 
     const ether = web3.toBigNumber(web3.toWei(1, 'ether'));
-    const tokenDecimals = 1;
+    const tokenDecimals = 18;
 
     const currentTimestamp = moment().unix();
 
@@ -24,31 +24,31 @@ contract('IcoStagesPricingStrategy', function (accounts) {
     /** Zero default week. Equal to the fourth week and will be applied if all stages passed */
     stageWeeks[0] = [
         web3.toBigNumber('0'),
-        web3.toBigNumber(ether.div(450)),
+        web3.toBigNumber(ether.divToInt(450)),
     ];
 
     /** First week. 665 IDS/1eth */
     stageWeeks[1] = [
         web3.toBigNumber(moment(currentTimestamp, 'X').add(1, 'weeks').unix()),
-        web3.toBigNumber(ether.div(665)),
+        web3.toBigNumber(ether.divToInt(665)),
     ];
 
     /** Second week. 550 IDS/1eth */
     stageWeeks[2] = [
         web3.toBigNumber(moment(currentTimestamp, 'X').add(2, 'weeks').unix()),
-        web3.toBigNumber(ether.div(550)),
+        web3.toBigNumber(ether.divToInt(550)),
     ];
 
     /** Third week. 500 IDS/1eth */
     stageWeeks[3] = [
         web3.toBigNumber(moment(currentTimestamp, 'X').add(3, 'weeks').unix()),
-        web3.toBigNumber(ether.div(500)),
+        web3.toBigNumber(ether.divToInt(500)),
     ];
 
     /** Fourth week. 450 IDS/1eth */
     stageWeeks[4] = [
         web3.toBigNumber(moment(currentTimestamp, 'X').add(4, 'weeks').unix()),
-        web3.toBigNumber(ether.div(450)),
+        web3.toBigNumber(ether.divToInt(450)),
     ];
 
     beforeEach(async () => {
@@ -183,8 +183,13 @@ contract('IcoStagesPricingStrategy', function (accounts) {
 
     it('Calculate tokens to sell on first and second stages', async function () {
         try {
-            const firstStageTokensWillBeReceived = web3.toBigNumber('6650');
-            const secondStageTokensWillBeReceived = web3.toBigNumber('5500');
+            const firstStageTokensWillBeReceived = ether.mul('1e18').divToInt(
+                ether.divToInt(665)
+            );
+
+            const secondStageTokensWillBeReceived = ether.mul('1e18').divToInt(
+                ether.divToInt(550)
+            );
 
             //Check the first week
             await instance.initPricingStrategy(currentTimestamp);
