@@ -33,10 +33,22 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     uint256 public icoStartedTimestamp;
 
     /** Total amount of wei raised in the CrowdSale */
-    uint256 public weiRaised;
+    uint256 public totalWeiRaised;
+
+    /** Wei raised on Pre ICO stage */
+    uint256 public preIcoWeiRaised;
+
+    /** Wei raised on ICO stage */
+    uint256 public icoWeiRaised;
 
     /** Total number of tokens sold in the CrowdSale */
-    uint256 public tokensSold;
+    uint256 public totalTokensSold;
+
+    /** Tokens sold on PreICO */
+    uint256 public preIcoTokensSold;
+
+    /** Tokens sold on ICO */
+    uint256 public icoTokensSold;
 
     /** Total number of investors */
     uint256 public investorCount;
@@ -147,14 +159,17 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
         tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
 
         // Update totals
-        weiRaised = weiRaised.add(weiAmount);
-        tokensSold = tokensSold.add(tokenAmount);
+        totalWeiRaised = totalWeiRaised.add(weiAmount);
+        totalTokensSold = totalTokensSold.add(tokenAmount);
+
+        //Update stage counters
+        increaseStageCounters(weiAmount, tokenAmount);
 
         //Assign tokens
         assignTokens(receiver, tokenAmount);
 
         //Send ether to RefundVault
-        forwardFunds();
+        forwardFunds(weiAmount, receiver);
     }
 
     /**
@@ -216,11 +231,11 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
 
         if (isReachedSoftCap()) {
             status = Status.Success;
-            Success(msg.sender, icoFinalizedTimestamp, weiRaised);
+            Success(msg.sender, icoFinalizedTimestamp, totalWeiRaised);
         }
         else {
             status = Status.Failed;
-            Failed(msg.sender, icoFinalizedTimestamp, weiRaised);
+            Failed(msg.sender, icoFinalizedTimestamp, totalWeiRaised);
         }
     }
 
@@ -258,14 +273,14 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
      * @dev Is wei was raised enough to reach soft cap
      */
     function isReachedSoftCap() public constant returns (bool) {
-        return weiRaised >= weiSoftCap;
+        return icoWeiRaised >= weiSoftCap;
     }
 
     /**
      * @dev Is wei was raised enough to reach hard cap
      */
     function isReachedHardCap() public constant returns (bool) {
-        return weiRaised >= weiHardCap;
+        return icoWeiRaised >= weiHardCap;
     }
 
     /**
@@ -292,10 +307,29 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     }
 
     /**
+     * @dev Increase stage counters
+     */
+    function increaseStageCounters(uint256 _weiAmount, uint256 _tokenAmount) private {
+        if (status == Status.PreIco) {
+            preIcoWeiRaised = preIcoWeiRaised.add(_weiAmount);
+            preIcoTokensSold = preIcoTokensSold.add(_tokenAmount);
+        }
+
+        if (status == Status.Ico) {
+            icoWeiRaised = icoWeiRaised.add(_weiAmount);
+            icoTokensSold = icoTokensSold.add(_tokenAmount);
+        }
+    }
+
+    /**
      * @dev Forward invested fund to refund vault
      */
-    function forwardFunds() private {
-        refundVault.deposit.value(msg.value)(msg.sender);
+    function forwardFunds(uint256 _value, address _receiver) private {
+        if (status == Status.PreIco) {
+            wallet.transfer(_value);
+        } else {
+            refundVault.deposit.value(_value)(_receiver);
+        }
     }
 
     /**

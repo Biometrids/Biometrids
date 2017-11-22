@@ -55,6 +55,7 @@ let crowdSaleInstance;
 let preIcoFinalizeAgentInstance;
 let icoFinalizeAgentInstance;
 let refundVaultInstance;
+let wallet;
 
 const setupCrowdSale = async () => {
     tokenInstance = await BiometridsToken.at(BiometridsToken.address);
@@ -63,6 +64,7 @@ const setupCrowdSale = async () => {
     crowdSaleInstance = await CrowdSale.deployed();
     preIcoFinalizeAgentInstance = await PreIcoFinalizeAgent.deployed();
     refundVaultInstance = await CrowdSaleRefundVault.deployed();
+    wallet = await refundVaultInstance.getWallet();
 
     icoFinalizeAgentInstance = await IcoFinalizeAgent.new(crowdSaleInstance.address, refundVaultInstance.address);
 
@@ -77,7 +79,7 @@ const setupCrowdSale = async () => {
         web3
     );
 
-    refundVaultInstance.address = await crowdSaleInstance.refundVault();
+    // refundVaultInstance.address = await crowdSaleInstance.refundVault();
 };
 
 
@@ -194,7 +196,7 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
     });
 
     it('Invest via invest() method', async function () {
-        const initialRefundVaultBalance = web3.eth.getBalance(refundVaultInstance.address);
+        const initialRefundVaultBalance = web3.eth.getBalance(wallet);
         const initialInvestorTokens = await tokenInstance.balanceOf(investor);
 
         await crowdSaleInstance.invest({value: ether(1), from: investor});
@@ -202,12 +204,12 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
         (await tokenInstance.balanceOf(investor))
             .should.be.bignumber.equal(initialInvestorTokens.add(preIcoTokensShouldBeReceived));
 
-        (await web3.eth.getBalance(refundVaultInstance.address))
+        (await web3.eth.getBalance(wallet))
             .should.be.bignumber.equal(initialRefundVaultBalance.add(ether(1)));
     });
 
     it('Invest via fallback method', async function () {
-        const initialRefundVaultBalance = web3.eth.getBalance(refundVaultInstance.address);
+        const initialRefundVaultBalance = web3.eth.getBalance(wallet);
         const initialInvestorTokens = await tokenInstance.balanceOf(investor);
 
         await web3.eth.sendTransaction(
@@ -217,7 +219,7 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
         (await tokenInstance.balanceOf(investor))
             .should.be.bignumber.equal(initialInvestorTokens.add(preIcoTokensShouldBeReceived));
 
-        (await web3.eth.getBalance(refundVaultInstance.address))
+        (await web3.eth.getBalance(wallet))
             .should.be.bignumber.equal(initialRefundVaultBalance.add(ether(1)));
     });
 
@@ -304,7 +306,7 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
     });
 
     it('Invest up to investment hardcap', async function () {
-        const etherNeedToInvest = (await crowdSaleInstance.weiHardCap()).sub((await crowdSaleInstance.weiRaised()));
+        const etherNeedToInvest = (await crowdSaleInstance.weiHardCap());
         await crowdSaleInstance.invest({value: etherNeedToInvest, from: investor});
 
         //Trying to break hardcap

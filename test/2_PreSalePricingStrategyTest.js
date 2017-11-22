@@ -1,8 +1,6 @@
 const PreIcoPricingStrategy = artifacts.require('PreIcoPricingStrategy.sol');
 const web3 = PreIcoPricingStrategy.web3;
 
-import expectThrow from './helpers/expectThrow';
-
 async function deployStrategy() {
     return PreIcoPricingStrategy.new();
 }
