@@ -25,11 +25,11 @@ const CrowdSaleRefundVault = artifacts.require('CrowdSaleRefundVault.sol');
 const preSaleTokensToSale = web3.toBigNumber('5e24');
 const icoTokensToSale = web3.toBigNumber('7e25');
 
-const preIcoTokenPrice = ether(1).divToInt(910);
+const preIcoTokenPrice = ether(1).divToInt(1330);
 // 1e18 - is 18 decimals
 const preIcoTokensShouldBeReceived = ether(1).mul('1e18').divToInt(preIcoTokenPrice);
 
-const icoFourthWeekTokenPrice = ether(1).divToInt(450);
+const icoFourthWeekTokenPrice = ether(1).divToInt(600);
 // 1e18 - is 18 decimals
 const icoTokensShouldBeReceived = ether(1).mul('1e18').divToInt(icoFourthWeekTokenPrice);
 

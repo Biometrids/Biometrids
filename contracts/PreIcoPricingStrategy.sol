@@ -10,7 +10,7 @@ contract PreIcoPricingStrategy is PricingStrategyInterface, HasNoEther {
     using SafeMath for uint256;
 
     /** 910 IDS for 1 ether */
-    uint256 public oneTokenInWei = 1 ether / uint256(910);
+    uint256 public oneTokenInWei = 1 ether / uint256(1330);
 
     /**
      * @dev Interface method for checking pricing strategy
