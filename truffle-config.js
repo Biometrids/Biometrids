@@ -16,12 +16,12 @@ module.exports = {
             /**
              * From address should be changed
              */
-            from: "0x3a0b31e77f1d608ab0497a259f7bf8a8417f83ff",
+            from: "0x38bdB4cA3E2837597bEb8d189dDd6b89704A4066",
             /**
              * Current default gas price.
              * Minimal could be 100000000 wei (confirm one transaction for 3 minutes)
              */
-            gasPrice: "21000000000"
+            gasPrice: "50000000000"
         }
     }
 };
