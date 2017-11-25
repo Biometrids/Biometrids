@@ -2,7 +2,7 @@
 1. Install nodejs and npm
 2. Install project dependencies: `npm install`
 
-##Start truffle develop mode
+## Start truffle develop mode
 `npm run develop`  
 
 ## Run testrpc (do it in a separate bash session). You will need this one before you start testing.
