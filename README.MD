@@ -1,5 +1,3 @@
-# Don't forget to change wallet address before deployment. Placed here: `migrations/5_CrowdSaleRefundVault.js`
-
 ## Install project dependencies
 1. Install nodejs and npm
 2. Install project dependencies: `npm install`
