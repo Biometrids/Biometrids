@@ -24,31 +24,31 @@ contract('IcoStagesPricingStrategy', function (accounts) {
     /** Zero default week. Equal to the fourth week and will be applied if all stages passed */
     stageWeeks[0] = [
         web3.toBigNumber('0'),
-        web3.toBigNumber(ether.divToInt(600)),
+        web3.toBigNumber(ether.divToInt(2000)),
     ];
 
-    /** First week. 1000 IDS/1eth */
+    /** First week. 3000 IDS/1eth */
     stageWeeks[1] = [
         web3.toBigNumber(moment(currentTimestamp, 'X').add(1, 'weeks').unix()),
-        web3.toBigNumber(ether.divToInt(1000)),
+        web3.toBigNumber(ether.divToInt(3000)),
     ];
 
-    /** Second week. 850 IDS/1eth */
+    /** Second week. 2600 IDS/1eth */
     stageWeeks[2] = [
         web3.toBigNumber(moment(currentTimestamp, 'X').add(2, 'weeks').unix()),
-        web3.toBigNumber(ether.divToInt(850)),
+        web3.toBigNumber(ether.divToInt(2600)),
     ];
 
-    /** Third week. 700 IDS/1eth */
+    /** Third week. 2200 IDS/1eth */
     stageWeeks[3] = [
         web3.toBigNumber(moment(currentTimestamp, 'X').add(3, 'weeks').unix()),
-        web3.toBigNumber(ether.divToInt(700)),
+        web3.toBigNumber(ether.divToInt(2200)),
     ];
 
-    /** Fourth week. 600 IDS/1eth */
+    /** Fourth week. 2000 IDS/1eth */
     stageWeeks[4] = [
         web3.toBigNumber(moment(currentTimestamp, 'X').add(4, 'weeks').unix()),
-        web3.toBigNumber(ether.divToInt(600)),
+        web3.toBigNumber(ether.divToInt(2000)),
     ];
 
     beforeEach(async () => {
@@ -184,11 +184,11 @@ contract('IcoStagesPricingStrategy', function (accounts) {
     it('Calculate tokens to sell on first and second stages', async function () {
         try {
             const firstStageTokensWillBeReceived = ether.mul('1e18').divToInt(
-                ether.divToInt(1000)
+                ether.divToInt(3000)
             );
 
             const secondStageTokensWillBeReceived = ether.mul('1e18').divToInt(
-                ether.divToInt(850)
+                ether.divToInt(2600)
             );
 
             //Check the first week

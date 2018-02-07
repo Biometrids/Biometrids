@@ -52,23 +52,23 @@ contract IcoStagesPricingStrategy is PricingStrategyInterface, OnlyAllowedAddres
 
         /** Zero default week. Equal to the fourth week and will be applied if all stages passed */
         stageWeeks[0].endTime = 0;
-        stageWeeks[0].oneTokenInWei = 1 ether / uint256(600);
+        stageWeeks[0].oneTokenInWei = 1 ether / uint256(2000);
 
-        /** First week. 665 IDS/1eth */
+        /** First week. 3000 IDS/1eth */
         stageWeeks[1].endTime = _startTimestamp.add(1 weeks);
-        stageWeeks[1].oneTokenInWei = 1 ether / uint256(1000);
+        stageWeeks[1].oneTokenInWei = 1 ether / uint256(3000);
 
-        /** Second week. 550 IDS/1eth */
+        /** Second week. 2600 IDS/1eth */
         stageWeeks[2].endTime = _startTimestamp.add(2 weeks);
-        stageWeeks[2].oneTokenInWei = 1 ether / uint256(850);
+        stageWeeks[2].oneTokenInWei = 1 ether / uint256(2600);
 
-        /** Third week. 500 IDS/1eth */
+        /** Third week. 2200 IDS/1eth */
         stageWeeks[3].endTime = _startTimestamp.add(3 weeks);
-        stageWeeks[3].oneTokenInWei = 1 ether / uint256(700);
+        stageWeeks[3].oneTokenInWei = 1 ether / uint256(2200);
 
-        /** Fourth week. 450 IDS/1eth */
+        /** Fourth week. 2000 IDS/1eth */
         stageWeeks[4].endTime = _startTimestamp.add(4 weeks);
-        stageWeeks[4].oneTokenInWei = 1 ether / uint256(600);
+        stageWeeks[4].oneTokenInWei = 1 ether / uint256(2000);
 
         stageWeeksCount = 5;
         isInitialized = true;

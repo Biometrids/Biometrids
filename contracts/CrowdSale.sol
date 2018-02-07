@@ -12,10 +12,10 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     using SafeMath for uint256;
 
     /** Minimal value of ether needed */
-    uint256 public constant weiSoftCap = 4000 ether;
+    uint256 public constant weiSoftCap = 2300 ether;
 
     /** Maximal value of ether needed */
-    uint256 public constant weiHardCap = 80000 ether;
+    uint256 public constant weiHardCap = 23000 ether;
 
     /** Minimal value allowed to be invested */
     uint256 public constant minimalInvestmentValue = 1 ether / 10;
