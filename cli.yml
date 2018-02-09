@@ -1,0 +1,19 @@
+
+ethereum:
+  endpoint: 'ipc://{home}/.ethereum/geth.ipc'
+  from: '0x036a3ca4751775c183f39ea1b3e609fff58e3105'
+  lockfilesDir: "{cwd}"
+  gas: '45e5'
+  gasPrice: '10e9'
+  BiometridsToken:
+    schema: '{moduledir}/build/contracts/BiometridsToken.json'
+    instance: '0x69ff86baec4b1bf98f9fc77348d4aee2119e9810'
+  IcoStagesPricingStrategy:
+    schema: '{moduledir}/build/contracts/IcoStagesPricingStrategy.json'
+  CrowdSaleRefundVault:
+    schema: '{moduledir}/build/contracts/CrowdSaleRefundVault.json'
+    wallet: '0xe03166880a8c52556d0750b5bcc55b59d1bc4eff' # wallet
+  CrowdSale:
+    schema: '{moduledir}/build/contracts/CrowdSale.json'
+  IcoFinalizeAgent:
+    schema: '{moduledir}/build/contracts/IcoFinalizeAgent.json'

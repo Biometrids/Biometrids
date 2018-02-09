@@ -1,0 +1,120 @@
+{
+  "$id": "ICliConfig",
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "definitions": {},
+  "properties": {
+    "ethereum": {
+      "type": "object",
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "description": "Network endpoint URL"
+        },
+        "lockfilesDir": {
+          "type": "string",
+          "description": "Directory where contract deployment lock files stored"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^0x[a-zA-Z0-9]{40}$",
+          "description": "Network from address"
+        },
+        "gas": {
+          "type": "string",
+          "description": "Default Gas limit",
+          "pattern": "^\\d+(e\\d+)?$"
+        },
+        "gasPrice": {
+          "type": "string",
+          "description": "Default Gas price",
+          "pattern": "^\\d+(e\\d+)?$"
+        },
+        "BiometridsToken": {
+          "type": "object",
+          "description": "Biometrids token contract",
+          "properties": {
+            "schema": {
+              "type": "string",
+              "description": "Path to the contract schema"
+            },
+            "instance": {
+              "type": "string",
+              "pattern": "^0x[a-zA-Z0-9]{40}$",
+              "description" : "Address for deployed Token contract"
+            }
+          },
+          "required": [
+            "schema"
+          ]
+        },
+        "IcoStagesPricingStrategy": {
+          "type": "object",
+          "description": "Ico stages pricing strategy contract",
+          "properties": {
+            "schema": {
+              "type": "string",
+              "description": "Path to the contract schema"
+            }
+          },
+          "required": [
+            "schema"
+          ]
+        },
+        "CrowdSaleRefundVault": {
+          "type": "object",
+          "description": "Crowd sale refund vault contract",
+          "properties": {
+            "schema": {
+              "type": "string",
+              "description": "Path to the contract schema"
+            },
+            "wallet": {
+              "type": "string",
+              "description": "wallet"
+            }
+          },
+          "required": [
+            "schema"
+          ]
+        },
+        "CrowdSale": {
+          "type": "object",
+          "description": "Crowd sale contract",
+          "properties": {
+            "schema": {
+              "type": "string",
+              "description": "Path to the contract schema"
+            }
+          },
+          "required": [
+            "schema"
+          ]
+        },
+        "IcoFinalizeAgent": {
+          "type": "object",
+          "description": "Ico finalize agent contract",
+          "properties": {
+            "schema": {
+              "type": "string",
+              "description": "Path to the contract schema"
+            }
+          },
+          "required": [
+            "schema"
+          ]
+        }
+      },
+      "required": [
+        "endpoint",
+        "from",
+        "lockfilesDir",
+        "gas",
+        "gasPrice"
+      ]
+    }
+  },
+  "required": [
+    "ethereum"
+  ]
+}
