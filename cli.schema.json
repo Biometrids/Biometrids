@@ -71,7 +71,13 @@
             },
             "wallet": {
               "type": "string",
+              "pattern": "^0x[a-zA-Z0-9]{40}$",
               "description": "wallet"
+            },
+            "instance": {
+              "type": "string",
+              "pattern": "^0x[a-zA-Z0-9]{40}$",
+              "description" : "Address for deployed Refund vault contract"
             }
           },
           "required": [
@@ -85,10 +91,16 @@
             "schema": {
               "type": "string",
               "description": "Path to the contract schema"
+            },
+            "tokens": {
+              "type": "string",
+              "description": "Tokens amount for ICO stage",
+              "pattern": "^\\d+(e\\d+)?$"
             }
           },
           "required": [
-            "schema"
+            "schema",
+            "tokens"
           ]
         },
         "IcoFinalizeAgent": {
@@ -110,7 +122,12 @@
         "from",
         "lockfilesDir",
         "gas",
-        "gasPrice"
+        "gasPrice",
+        "BiometridsToken",
+        "IcoStagesPricingStrategy",
+        "CrowdSaleRefundVault",
+        "CrowdSale",
+        "IcoFinalizeAgent"
       ]
     }
   },

@@ -1,6 +1,5 @@
 const IcoFinalizeAgent = artifacts.require('IcoFinalizeAgent.sol');
 const CrowdSale = artifacts.require('CrowdSale.sol');
-const PreIcoFinalizeAgent = artifacts.require('PreIcoFinalizeAgent.sol');
 const BiometridsToken = artifacts.require('BiometridsToken.sol');
 const IcoStagesPricingStrategy = artifacts.require('IcoStagesPricingStrategy.sol');
 const CrowdSaleRefundVault = artifacts.require('CrowdSaleRefundVault.sol');
@@ -25,7 +24,6 @@ module.exports = async function (deployer) {
         tokenInstance,
         pricingStrategyInstance,
         refundVaultInstance,
-        PreIcoFinalizeAgent.address,
         IcoFinalizeAgent.address,
         web3
     );

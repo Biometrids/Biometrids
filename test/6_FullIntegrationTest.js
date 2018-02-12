@@ -15,19 +15,12 @@ import EVMRevert from './helpers/EVMRevert';
 const moment = require('moment');
 
 const BiometridsToken = artifacts.require('BiometridsToken.sol');
-const PreIcoPricingStrategy = artifacts.require('PreIcoPricingStrategy.sol');
 const IcoStagesPricingStrategy = artifacts.require('IcoStagesPricingStrategy.sol');
-const PreIcoFinalizeAgent = artifacts.require('PreIcoFinalizeAgent.sol');
-const CrowdSale = artifacts.require('CrowdSale.sol');
 const IcoFinalizeAgent = artifacts.require('IcoFinalizeAgent.sol');
+const CrowdSale = artifacts.require('CrowdSale.sol');
 const CrowdSaleRefundVault = artifacts.require('CrowdSaleRefundVault.sol');
 
-const preSaleTokensToSale = web3.toBigNumber('5e24');
 const icoTokensToSale = web3.toBigNumber('7e25');
-
-const preIcoTokenPrice = ether(1).divToInt(1330);
-// 1e18 - is 18 decimals
-const preIcoTokensShouldBeReceived = ether(1).mul('1e18').divToInt(preIcoTokenPrice);
 
 const icoFourthWeekTokenPrice = ether(1).divToInt(2000);
 // 1e18 - is 18 decimals
@@ -35,11 +28,9 @@ const icoTokensShouldBeReceived = ether(1).mul('1e18').divToInt(icoFourthWeekTok
 
 const crowdSaleStates = {
     'Unknown': 0,
-    'PreIco': 1,
-    'PreIcoFinalized': 2,
-    'Ico': 3,
-    'Success': 4,
-    'Failed': 5
+    'Ico': 1,
+    'Success': 2,
+    'Failed': 3
 };
 
 const walletStates = {
@@ -49,20 +40,16 @@ const walletStates = {
 };
 
 let tokenInstance;
-let preIcoPricingStrategyInstance;
 let icoStagesPricingStrategyInstance;
 let crowdSaleInstance;
-let preIcoFinalizeAgentInstance;
 let icoFinalizeAgentInstance;
 let refundVaultInstance;
 let wallet;
 
 const setupCrowdSale = async () => {
     tokenInstance = await BiometridsToken.at(BiometridsToken.address);
-    preIcoPricingStrategyInstance = await PreIcoPricingStrategy.deployed();
     icoStagesPricingStrategyInstance = await IcoStagesPricingStrategy.deployed();
     crowdSaleInstance = await CrowdSale.deployed();
-    preIcoFinalizeAgentInstance = await PreIcoFinalizeAgent.deployed();
     refundVaultInstance = await CrowdSaleRefundVault.deployed();
     wallet = await refundVaultInstance.getWallet();
 
@@ -74,7 +61,6 @@ const setupCrowdSale = async () => {
         tokenInstance,
         icoStagesPricingStrategyInstance,
         refundVaultInstance,
-        preIcoFinalizeAgentInstance.address,
         icoFinalizeAgentInstance.address,
         web3
     );
@@ -91,10 +77,10 @@ contract('CrowdSale', function ([owner, investor, thirdParty]) {
 
     it('Check that CrowdSale initialized correctly', async function () {
         try {
-            //Pre Ico pricing strategy is set by default
+            // Ico pricing strategy is set by default
             assert.equal(
                 await crowdSaleInstance.pricingStrategy(),
-                preIcoPricingStrategyInstance.address
+                icoStagesPricingStrategyInstance.address
             );
 
             //Token is set
@@ -109,12 +95,6 @@ contract('CrowdSale', function ([owner, investor, thirdParty]) {
                 await icoFinalizeAgentInstance.refundVault()
             );
 
-            //Pre Ico Finalize agent is set
-            assert.equal(
-                await crowdSaleInstance.preIcoFinalizeAgent(),
-                preIcoFinalizeAgentInstance.address
-            );
-
             //Ico finalize agent is set
             assert.equal(
                 await crowdSaleInstance.icoFinalizeAgent(),
@@ -124,13 +104,13 @@ contract('CrowdSale', function ([owner, investor, thirdParty]) {
             //Check the initial allowance
             assert.equal(
                 (await tokenInstance.allowance(owner, crowdSaleInstance.address)),
-                preSaleTokensToSale.toString()
+                icoTokensToSale.toString()
             );
 
-            //Check pre ico finalize agent strategy
+            //Check ico finalize agent refund vault
             assert.equal(
-                (await preIcoFinalizeAgentInstance.icoStagesPricingStrategy()),
-                icoStagesPricingStrategyInstance.address
+                (await icoFinalizeAgentInstance.refundVault()),
+                refundVaultInstance.address
             );
         } catch (err) {
             assert(false, err.message)
@@ -146,17 +126,19 @@ contract('CrowdSale', function ([owner, investor, thirdParty]) {
         }
     });
 
-    it('Exception when trying to set pricing strategy from the non whitelisted address', async function () {
+    it('Exception when trying to invest from blacklisted investor', async function () {
         try {
-            await crowdSaleInstance.setPricingStrategy(icoStagesPricingStrategyInstance.address, {from: thirdParty});
+            await crowdSaleInstance.enableWhitelist();
+            await crowdSaleInstance.blacklist(investor);
+            await crowdSaleInstance.invest({from: investor, value: ether(1)});
         } catch (err) {
-            assert(true);
+            assert(true)
         }
     });
 
-    it('Exception when trying to set pre ico finalize agent from the non-whitelisted address', async function () {
+    it('Exception when trying to set pricing strategy from the non whitelisted address', async function () {
         try {
-            await crowdSaleInstance.setPreIcoFinalizeAgent(preIcoFinalizeAgentInstance.address, {from: thirdParty});
+            await crowdSaleInstance.setPricingStrategy(icoStagesPricingStrategyInstance.address, {from: thirdParty});
         } catch (err) {
             assert(true);
         }
@@ -177,92 +159,11 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
         await setupCrowdSale();
     });
 
-    it('Start Pre ICO', async function () {
-        try {
-            await crowdSaleInstance.startPreIco();
-
-            assert.equal(
-                await crowdSaleInstance.status(),
-                crowdSaleStates['PreIco']
-            );
-
-            assert.notEqual(
-                await crowdSaleInstance.preIcoStartedTimestamp(),
-                0
-            );
-        } catch (err) {
-            assert(false, err.message)
-        }
-    });
-
-    it('Invest via invest() method', async function () {
-        const initialRefundVaultBalance = web3.eth.getBalance(wallet);
-        const initialInvestorTokens = await tokenInstance.balanceOf(investor);
-
-        await crowdSaleInstance.invest({value: ether(1), from: investor});
-
-        (await tokenInstance.balanceOf(investor))
-            .should.be.bignumber.equal(initialInvestorTokens.add(preIcoTokensShouldBeReceived));
-
-        (await web3.eth.getBalance(wallet))
-            .should.be.bignumber.equal(initialRefundVaultBalance.add(ether(1)));
-    });
-
-    it('Invest via fallback method', async function () {
-        const initialRefundVaultBalance = web3.eth.getBalance(wallet);
-        const initialInvestorTokens = await tokenInstance.balanceOf(investor);
-
-        await web3.eth.sendTransaction(
-            {from: investor, to: crowdSaleInstance.address, value: ether(1), gas: 3000000}
-        );
-
-        (await tokenInstance.balanceOf(investor))
-            .should.be.bignumber.equal(initialInvestorTokens.add(preIcoTokensShouldBeReceived));
-
-        (await web3.eth.getBalance(wallet))
-            .should.be.bignumber.equal(initialRefundVaultBalance.add(ether(1)));
-    });
-
-    it('Could not invest if investment is less that 0.1 ether', async function () {
-        await crowdSaleInstance.invest({value: ether(0.09), from: investor}).should.be.rejectedWith(EVMRevert);
-    });
-
-    it('Could not finalize until 7 days not passed', async function () {
-        await crowdSaleInstance.finalizePreIco().should.be.rejectedWith(EVMRevert);
-    });
-
-    it('Could not start ICO when PreIco is going', async function () {
-        await crowdSaleInstance.startIco().should.be.rejectedWith(EVMRevert);
-    });
-
-    it('When 7 days passed from Pre-ICO', async function () {
-        //7 days from pre ico start was passed
-        await increaseTimeTo(moment(latestTime(), 'X').add(1, 'weeks').unix());
-
-        await crowdSaleInstance.invest({value: ether(1), from: investor}).should.be.rejectedWith(EVMRevert);
-
-        await crowdSaleInstance.finalizePreIco();
-
-        (await crowdSaleInstance.status()).should.be.bignumber.equal(
-            crowdSaleStates['PreIcoFinalized']
-        );
-        (await crowdSaleInstance.preIcoFinalizedTimestamp()).should.not.be.bignumber.equal(0);
-
-        await crowdSaleInstance.invest({value: ether(1), from: investor}).should.be.rejectedWith(EVMRevert);
-    });
-
-    it('Could not start ICO until 14 days not passed', async function () {
-        await crowdSaleInstance.startIco().should.be.rejectedWith(EVMRevert);
-    });
-
     it('Could no finalize ICO while ICO is not actually started', async function () {
         await crowdSaleInstance.finalizeIco().should.be.rejectedWith(EVMRevert);
     });
 
     it('Start ICO', async function () {
-        //14 days from pre ico final was passed
-        await increaseTimeTo(moment(latestTime(), 'X').add(2, 'weeks').unix());
-
         const icoTokensAllowed = web3.toBigNumber('70000000').mul(
             web3.toBigNumber(10).pow(await tokenInstance.decimals())
         );
@@ -271,7 +172,7 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
         await tokenInstance.approve(crowdSaleInstance.address, icoTokensAllowed);
 
         (await tokenInstance.allowance(owner, crowdSaleInstance.address))
-            .should.be.bignumber.equal(icoTokensToSale);
+        .should.be.bignumber.equal(icoTokensToSale);
 
         await crowdSaleInstance.startIco();
 
@@ -295,10 +196,10 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
         await crowdSaleInstance.invest({value: ether(1), from: investor});
 
         (await tokenInstance.balanceOf(investor))
-            .should.be.bignumber.equal(initialInvestorTokens.add(icoTokensShouldBeReceived));
+        .should.be.bignumber.equal(initialInvestorTokens.add(icoTokensShouldBeReceived));
 
         (await web3.eth.getBalance(refundVaultInstance.address))
-            .should.be.bignumber.equal(initialRefundVaultBalance.add(ether(1)));
+        .should.be.bignumber.equal(initialRefundVaultBalance.add(ether(1)));
     });
 
     it('Could not finalize ICO while at least 4 weeks have not passed', async function () {
@@ -334,6 +235,50 @@ contract('CrowdSale - Invest with Success flow', function ([owner, investor]) {
     });
 });
 
+contract('CrowdSale - Whitelisting', function ([owner, investor]) {
+    it('Can manage whitelist with success', async function () {
+        await crowdSaleInstance.enableWhitelist({from: owner});
+        (await crowdSaleInstance.whitelistEnabled.call()).should.be.equal(true);
+        await crowdSaleInstance.disableWhitelist({from: owner});
+        (await crowdSaleInstance.whitelistEnabled.call()).should.be.equal(false);
+    });
+
+    it('Only allowed addresses can manage whitelisting', async function () {
+        await crowdSaleInstance.enableWhitelist({from: investor}).should.be.rejectedWith(EVMRevert);
+        (await crowdSaleInstance.whitelistEnabled.call()).should.be.equal(false);
+        await crowdSaleInstance.enableWhitelist({from: owner});
+        (await crowdSaleInstance.whitelistEnabled.call()).should.be.equal(true);
+        (await crowdSaleInstance.whitelisted(investor, {from: owner})).should.be.equal(false);
+        await crowdSaleInstance.whitelist(investor, {from: investor}).should.be.rejectedWith(EVMRevert);
+        (await crowdSaleInstance.whitelisted(investor, {from: owner})).should.be.equal(false);
+        await crowdSaleInstance.whitelist(investor, {from: owner});
+        (await crowdSaleInstance.whitelisted(investor, {from: owner})).should.be.equal(true);
+        await crowdSaleInstance.blacklist(investor, {from: investor}).should.be.rejectedWith(EVMRevert);
+        (await crowdSaleInstance.whitelisted(investor, {from: owner})).should.be.equal(true);
+        await crowdSaleInstance.blacklist(investor, {from: owner});
+        (await crowdSaleInstance.whitelisted(investor, {from: owner})).should.be.equal(false);
+        await crowdSaleInstance.disableWhitelist({from: investor}).should.be.rejectedWith(EVMRevert);
+        (await crowdSaleInstance.whitelistEnabled.call()).should.be.equal(true);
+        await crowdSaleInstance.disableWhitelist({from: owner});
+    });
+
+    it('Can whitelist investor with success', async function () {
+        await crowdSaleInstance.enableWhitelist({from: owner});
+        await crowdSaleInstance.whitelist(investor, {from: owner});
+        (await crowdSaleInstance.whitelisted(investor, {from: owner})).should.be.equal(true);
+        await crowdSaleInstance.disableWhitelist({from: owner});
+    });
+
+    it('Can blacklist investor with success', async function () {
+        await crowdSaleInstance.enableWhitelist({from: owner});
+        await crowdSaleInstance.whitelist(investor, {from: owner});
+        (await crowdSaleInstance.whitelisted(investor, {from: owner})).should.be.equal(true);
+        await crowdSaleInstance.blacklist(investor, {from: owner});
+        (await crowdSaleInstance.whitelisted(investor, {from: owner})).should.be.equal(false);
+        await crowdSaleInstance.disableWhitelist({from: owner});
+    })
+});
+
 contract('CrowdSale - Invest with Failed flow', function ([owner, investor]) {
     before(async function () {
         await advanceBlock();
@@ -341,13 +286,6 @@ contract('CrowdSale - Invest with Failed flow', function ([owner, investor]) {
     });
 
     it('Fail the crowdsale and get refund', async function () {
-        await crowdSaleInstance.startPreIco();
-        await crowdSaleInstance.invest({value: ether(1), from: investor});
-        await increaseTimeTo(moment(latestTime(), 'X').add({weeks: 4, days: 1}).unix());
-
-        await crowdSaleInstance.finalizePreIco();
-
-        await increaseTimeTo(moment(latestTime(), 'X').add({days: 15}).unix());
         await crowdSaleInstance.startIco();
         await crowdSaleInstance.invest({value: ether(2), from: investor});
         const initialVaultBalance = await web3.eth.getBalance(refundVaultInstance.address);
@@ -357,6 +295,6 @@ contract('CrowdSale - Invest with Failed flow', function ([owner, investor]) {
         await crowdSaleInstance.claimRefund({from: investor});
 
         (await web3.eth.getBalance(refundVaultInstance.address))
-            .should.be.bignumber.not.equal(initialVaultBalance);
+        .should.be.bignumber.not.equal(initialVaultBalance);
     })
 });

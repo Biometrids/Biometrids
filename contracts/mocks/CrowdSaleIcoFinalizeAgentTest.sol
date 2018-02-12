@@ -7,13 +7,13 @@ import "../CrowdSale.sol";
 /**
  * @notice This is only mock for actual crowdsale. Used for testing finalize agents. Will be implemented in future/
  */
-contract CrowdSalePreIcoFinalizeAgentTest is CrowdSale {
+contract CrowdSaleIcoFinalizeAgentTest is CrowdSale {
     bool reachedSoftCap = false;
 
-    function CrowdSalePreIcoFinalizeAgentTest(
-    TokenInterface _token,
-    RefundVaultInterface _refundVault,
-    PricingStrategyInterface _pricingStrategy
+    function CrowdSaleIcoFinalizeAgentTest(
+        TokenInterface _token,
+        RefundVaultInterface _refundVault,
+        PricingStrategyInterface _pricingStrategy
     ) CrowdSale(_token, _refundVault, _pricingStrategy) public {}
 
     function setSoftCapFlag(bool _softCapFlag) public {

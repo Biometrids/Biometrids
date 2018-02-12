@@ -6,9 +6,10 @@ import "./interfaces/RefundVaultInterface.sol";
 import "./library/OnlyAllowedAddresses.sol";
 import "../node_modules/zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../node_modules/zeppelin-solidity/contracts/ownership/Claimable.sol";
+import "./library/Whitelisted.sol";
 
 
-contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
+contract CrowdSale is OnlyAllowedAddresses, Whitelisted, CrowdSaleInterface, Claimable {
     using SafeMath for uint256;
 
     /** Minimal value of ether needed */
@@ -20,12 +21,6 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     /** Minimal value allowed to be invested */
     uint256 public constant minimalInvestmentValue = 1 ether / 10;
 
-    /** When PreIco was started */
-    uint256 public preIcoStartedTimestamp;
-
-    /** When PreIco was ended */
-    uint256 public preIcoFinalizedTimestamp;
-
     /** When ICO was started */
     uint256 public icoFinalizedTimestamp;
 
@@ -35,17 +30,11 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     /** Total amount of wei raised in the CrowdSale */
     uint256 public totalWeiRaised;
 
-    /** Wei raised on Pre ICO stage */
-    uint256 public preIcoWeiRaised;
-
     /** Wei raised on ICO stage */
     uint256 public icoWeiRaised;
 
     /** Total number of tokens sold in the CrowdSale */
     uint256 public totalTokensSold;
-
-    /** Tokens sold on PreICO */
-    uint256 public preIcoTokensSold;
 
     /** Tokens sold on ICO */
     uint256 public icoTokensSold;
@@ -62,9 +51,6 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     /** Contract used for calculation tokens price */
     PricingStrategyInterface public pricingStrategy;
 
-    /** This agent will be called when PreIco stage will be finalized */
-    FinalizeAgentInterface public preIcoFinalizeAgent;
-
     /** This agent will ba called when ICO stage will be finalized */
     FinalizeAgentInterface public icoFinalizeAgent;
 
@@ -78,7 +64,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     address public wallet;
 
     /** CrowdSale statuses list */
-    enum Status {Unknown, PreIco, PreIcoFinalized, Ico, Success, Failed}
+    enum Status {Unknown, Ico, Success, Failed}
 
     /** CrowdSale current status */
     Status public status = Status.Unknown;
@@ -86,10 +72,6 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     /**
      * A set of events which could be read from the blockchain
      */
-    event PreIcoStarted(address indexed _sender, uint256 _timestamp);
-
-    event PreIcoFinalized(address indexed _sender, uint256 _timestamp);
-
     event IcoStarted(address indexed _sender, uint256 _timestamp);
 
     event Success(address indexed _sender, uint256 _timestamp, uint256 _weiRaised);
@@ -100,22 +82,16 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
 
     event PricingStrategyChanged(address indexed _changer, uint256 _timestamp);
 
-    event PreIcoFinalizeAgentChanged(address indexed _changer, uint256 _timestamp);
-
     event IcoFinalizeAgentChanged(address indexed _changer, uint256 _timestamp);
 
     /**
      * @dev All checks for the invest function
      */
     modifier allowedToInvest() {
-        require(status == Status.PreIco || status == Status.Ico);
+        require(status == Status.Ico);
         require(msg.value >= minimalInvestmentValue);
         require(pricingStrategy.strategyInitialized());
         require(!isReachedHardCap());
-        /** Don't allow to invest if 7 days passed at PreIco stage */
-        if (status == Status.PreIco) {
-            require(now <= getPreIcoDeadline());
-        }
         _;
     }
 
@@ -141,7 +117,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     /**
      * @dev The main invest function which forward ether into RefundVault and Sends tokens to investors
      */
-    function invest() allowedToInvest public payable {
+    function invest() allowedToInvest onlyWhitelisted public payable {
         uint256 weiAmount = msg.value;
         address receiver = msg.sender;
 
@@ -173,41 +149,10 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     }
 
     /**
-     * @dev Starting of PreIco company
-     */
-    function startPreIco() onlyAllowedAddresses public {
-        require(status == Status.Unknown);
-
-        status = Status.PreIco;
-        preIcoStartedTimestamp = now;
-
-        PreIcoStarted(msg.sender, preIcoStartedTimestamp);
-    }
-
-    /**
-     * @dev Finalize Pre Ico if at least 7 days was passed
-     */
-    function finalizePreIco() onlyAllowedAddresses public {
-        require(status == Status.PreIco);
-
-        //Check that at least 7 days passed
-        require(now >= getPreIcoDeadline());
-
-        preIcoFinalizeAgent.finalize();
-
-        status = Status.PreIcoFinalized;
-        preIcoFinalizedTimestamp = now;
-
-        PreIcoFinalized(msg.sender, preIcoFinalizedTimestamp);
-    }
-
-    /**
      * @dev Start main ICO stage and initialize 4 weeks pricing strategy
      */
     function startIco() onlyAllowedAddresses public {
-        require(status == Status.PreIcoFinalized);
-        //Check that at least 14 days was passed from the PreIco Deadline (not actual PreICO finalize date)
-        require(now >= (getPreIcoDeadline() + 14 days));
+        require(status == Status.Unknown);
 
         //Initialize pricing strategy with separated week stages
         pricingStrategy.initPricingStrategy(now);
@@ -219,7 +164,8 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     }
 
     /**
-     * @dev Finalize ICO and set status of crowdsale Success (send fund to the main multisig wallet) or Failed (unlocks funds for claim refund)
+     * @dev Finalize ICO and set status of crowdsale Success
+     * (send fund to the main multisig wallet) or Failed (unlocks funds for claim refund)
      */
     function finalizeIco() onlyAllowedAddresses public {
         require(status == Status.Ico);
@@ -247,16 +193,6 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
         require(pricingStrategy.isPricingStrategy());
 
         PricingStrategyChanged(msg.sender, now);
-    }
-
-    /**
-     * @dev Allows to change finalize agent manually by the owner to fix fat fingers errors
-     */
-    function setPreIcoFinalizeAgent(FinalizeAgentInterface _preIcoFinalizeAgent) onlyAllowedAddresses public {
-        preIcoFinalizeAgent = _preIcoFinalizeAgent;
-        require(preIcoFinalizeAgent.isFinalizeAgent());
-
-        PreIcoFinalizeAgentChanged(msg.sender, now);
     }
 
     /**
@@ -291,14 +227,6 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
     }
 
     /**
-     * @dev Helper for calculation of PreIco deadline (7 days from the start)
-     */
-    function getPreIcoDeadline() public constant returns (uint256 deadline) {
-        require(preIcoStartedTimestamp != 0);
-        deadline = preIcoStartedTimestamp + 7 days;
-    }
-
-    /**
      * @dev Investors could claim a refund if CrowdSale was failed
      */
     function claimRefund() external {
@@ -310,11 +238,6 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
      * @dev Increase stage counters
      */
     function increaseStageCounters(uint256 _weiAmount, uint256 _tokenAmount) private {
-        if (status == Status.PreIco) {
-            preIcoWeiRaised = preIcoWeiRaised.add(_weiAmount);
-            preIcoTokensSold = preIcoTokensSold.add(_tokenAmount);
-        }
-
         if (status == Status.Ico) {
             icoWeiRaised = icoWeiRaised.add(_weiAmount);
             icoTokensSold = icoTokensSold.add(_tokenAmount);
@@ -325,11 +248,7 @@ contract CrowdSale is OnlyAllowedAddresses, CrowdSaleInterface, Claimable {
      * @dev Forward invested fund to refund vault
      */
     function forwardFunds(uint256 _value, address _receiver) private {
-        if (status == Status.PreIco) {
-            wallet.transfer(_value);
-        } else {
-            refundVault.deposit.value(_value)(_receiver);
-        }
+        refundVault.deposit.value(_value)(_receiver);
     }
 
     /**

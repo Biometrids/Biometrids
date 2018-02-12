@@ -9,13 +9,7 @@ import "./TokenInterface.sol";
 contract CrowdSaleInterface {
     function setPricingStrategy(PricingStrategyInterface _pricingStrategy) public;
 
-    function setPreIcoFinalizeAgent(FinalizeAgentInterface _preIcoFinalizeAgent) public;
-
     function setIcoFinalizeAgent(FinalizeAgentInterface _icoFinalizeAgent) public;
-
-    function startPreIco() public;
-
-    function finalizePreIco() public;
 
     function startIco() public;
 

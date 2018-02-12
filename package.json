@@ -9,7 +9,7 @@
   "scripts": {
     "tests": "sh run-tests.sh",
     "test": "./node_modules/.bin/truffle test",
-    "compile": "./node_modules/.bin/truffle compile",
+    "compile": "./node_modules/.bin/truffle compile && tsc",
     "migrate": "./node_modules/.bin/truffle migrate",
     "develop": "./node_modules/.bin/truffle develop",
     "testrpc": "sh testrpc.sh"

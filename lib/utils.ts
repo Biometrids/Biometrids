@@ -8,15 +8,10 @@ export type KVMap = {
 export * from './utils/files';
 export * from './utils/strings';
 
-//Unknown, PreIco, PreIcoFinalized, Ico, Success, Failed
 export function toIcoStateIdToName(val: BigNumber.BigNumber): string {
   switch (val.toNumber()) {
     case ICOState.Unknown:
       return 'Unknown';
-    case ICOState.PreIco:
-      return 'PreIco';
-    case ICOState.PreIcoFinalized:
-      return 'PreIcoFinalized';
     case ICOState.Ico:
       return 'Ico';
     case ICOState.Success:

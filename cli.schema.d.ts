@@ -29,7 +29,7 @@ export interface ICliConfig {
     /**
      * Biometrids token contract
      */
-    BiometridsToken?: {
+    BiometridsToken: {
       /**
        * Path to the contract schema
        */
@@ -43,7 +43,7 @@ export interface ICliConfig {
     /**
      * Ico stages pricing strategy contract
      */
-    IcoStagesPricingStrategy?: {
+    IcoStagesPricingStrategy: {
       /**
        * Path to the contract schema
        */
@@ -53,7 +53,7 @@ export interface ICliConfig {
     /**
      * Crowd sale refund vault contract
      */
-    CrowdSaleRefundVault?: {
+    CrowdSaleRefundVault: {
       /**
        * Path to the contract schema
        */
@@ -62,22 +62,30 @@ export interface ICliConfig {
        * wallet
        */
       wallet?: string;
+      /**
+       * Address for deployed Refund vault contract
+       */
+      instance?: string;
       [k: string]: any;
     };
     /**
      * Crowd sale contract
      */
-    CrowdSale?: {
+    CrowdSale: {
       /**
        * Path to the contract schema
        */
       schema: string;
+      /**
+       * Tokens amount for ICO stage
+       */
+      tokens: string;
       [k: string]: any;
     };
     /**
      * Ico finalize agent contract
      */
-    IcoFinalizeAgent?: {
+    IcoFinalizeAgent: {
       /**
        * Path to the contract schema
        */

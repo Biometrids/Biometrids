@@ -1,11 +1,11 @@
 const IcoFinalizeAgentTest = artifacts.require('./mocks/IcoFinalizeAgentTest.sol');
-const CrowdSalePreIcoFinalizeAgentTest = artifacts.require('./mocks/CrowdSalePreIcoFinalizeAgentTest.sol');
+const CrowdSaleIcoFinalizeAgentTest = artifacts.require('./mocks/CrowdSaleIcoFinalizeAgentTest.sol');
 const IcoStagesPricingStrategy = artifacts.require('IcoStagesPricingStrategy.sol');
 const BiometridsToken = artifacts.require('BiometridsToken.sol');
 const CrowdSaleRefundVault = artifacts.require('CrowdSaleRefundVault.sol');
 
 async function deployCrowdSale(token, wallet, pricingStrategy) {
-    return CrowdSalePreIcoFinalizeAgentTest.new(token, wallet, pricingStrategy);
+    return CrowdSaleIcoFinalizeAgentTest.new(token, wallet, pricingStrategy);
 }
 
 async function deployFinalizeAgent(crowdSale, wallet) {

@@ -7,13 +7,16 @@ ethereum:
   gasPrice: '10e9'
   BiometridsToken:
     schema: '{moduledir}/build/contracts/BiometridsToken.json'
-    instance: '0x69ff86baec4b1bf98f9fc77348d4aee2119e9810'
+    instance: '0xd72e900bfa6ce5f5ab2e1d323fc8d1fb8382daee'
+#    instance: '0x08892d6eDe776e8B208C36dDee373d00324Efb8A' # production
   IcoStagesPricingStrategy:
     schema: '{moduledir}/build/contracts/IcoStagesPricingStrategy.json'
   CrowdSaleRefundVault:
     schema: '{moduledir}/build/contracts/CrowdSaleRefundVault.json'
-    wallet: '0xe03166880a8c52556d0750b5bcc55b59d1bc4eff' # wallet
+    instance: '0xa232b33faa4975a2e96f134a89e38f5a1ce8f75d'
+#    instance: '0x9bA6E731BeCc5C04878Eef7D52C90a8CF07746AE' # production
   CrowdSale:
     schema: '{moduledir}/build/contracts/CrowdSale.json'
+    tokens: '7e25' # 7e25
   IcoFinalizeAgent:
     schema: '{moduledir}/build/contracts/IcoFinalizeAgent.json'

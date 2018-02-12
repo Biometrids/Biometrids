@@ -35,8 +35,6 @@ else
 fi
 
 ./node_modules/.bin/truffle test ./test/1_BiometridsToken.js
-./node_modules/.bin/truffle test ./test/2_PreSalePricingStrategyTest.js
 ./node_modules/.bin/truffle test ./test/3_IcoStagesPricingStrategy.js
-./node_modules/.bin/truffle test ./test/4_PreIcoFinalizeAgent.js
 ./node_modules/.bin/truffle test ./test/5_IcoFinalizeAgent.js
 ./node_modules/.bin/truffle test ./test/6_FullIntegrationTest.js
