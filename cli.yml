@@ -2,7 +2,7 @@
 ethereum:
   endpoint: 'ipc://{home}/.ethereum/geth.ipc'
   from: '0x036a3ca4751775c183f39ea1b3e609fff58e3105'
-  lockfilesDir: "{cwd}"
+  lockfilesDir: "{home}"
   gas: '45e5'
   gasPrice: '10e9'
   BiometridsToken:
