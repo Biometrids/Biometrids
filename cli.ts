@@ -232,12 +232,9 @@ handlers['deploy'] = async () => {
         throw new Error(`BiometridsToken not specified`);
     }
 
-    if (!ctx.IcoStagesPricingStrategy.instance) {
-        const tcfg = ctx.cfg.ethereum.IcoStagesPricingStrategy;
-        console.log(`Deployment: 'IcoStagesPricingStrategy' `, tcfg);
-        ctx.IcoStagesPricingStrategy.instance = await ctx.IcoStagesPricingStrategy.meta.new();
-        console.log(`IcoStagesPricingStrategy successfully deployed at: ${ctx.IcoStagesPricingStrategy.instance.address}\n\n`);
-        writeDeployedContractAddress('IcoStagesPricingStrategy', ctx.IcoStagesPricingStrategy.instance.address);
+    const tokenOwner = await ctx.BiometridsToken.instance.owner.call();
+    if (tokenOwner !== ctx.cfg.ethereum.from) {
+        throw new Error(`Only Token owner can deploy CrowdSale`);
     }
 
     if (!ctx.CrowdSaleRefundVault.instance) {
@@ -246,6 +243,19 @@ handlers['deploy'] = async () => {
         ctx.CrowdSaleRefundVault.instance = await ctx.CrowdSaleRefundVault.meta.new(tcfg.wallet);
         console.log(`CrowdSaleRefundVault successfully deployed at: ${ctx.CrowdSaleRefundVault.instance.address}\n\n`);
         writeDeployedContractAddress('CrowdSaleRefundVault', ctx.CrowdSaleRefundVault.instance.address);
+    } else {
+        const refundVaultOwner = await ctx.CrowdSaleRefundVault.instance.owner.call();
+        if (refundVaultOwner !== ctx.cfg.ethereum.from) {
+            throw new Error(`You must be owner for RefundVault contract for deploy CrowdSale`);
+        }
+    }
+
+    if (!ctx.IcoStagesPricingStrategy.instance) {
+        const tcfg = ctx.cfg.ethereum.IcoStagesPricingStrategy;
+        console.log(`Deployment: 'IcoStagesPricingStrategy' `, tcfg);
+        ctx.IcoStagesPricingStrategy.instance = await ctx.IcoStagesPricingStrategy.meta.new();
+        console.log(`IcoStagesPricingStrategy successfully deployed at: ${ctx.IcoStagesPricingStrategy.instance.address}\n\n`);
+        writeDeployedContractAddress('IcoStagesPricingStrategy', ctx.IcoStagesPricingStrategy.instance.address);
     }
 
     if (!ctx.CrowdSale.instance) {

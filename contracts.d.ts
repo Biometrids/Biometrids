@@ -159,7 +159,7 @@ interface ICrowdSale extends IContractInstance, IOnlyAllowedAddresses, IWhitelis
     finalizeIco(tr?: Web3.TransactionRequest): Promise<ITXResult>;
 }
 
-interface ICrowdSaleRefundVault extends IContractInstance {
+interface ICrowdSaleRefundVault extends IContractInstance, IOnlyAllowedAddresses {
     allowAddress(adress: string, allow: boolean): Promise<any>
 }
 

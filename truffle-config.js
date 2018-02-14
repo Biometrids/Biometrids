@@ -2,11 +2,18 @@ require('babel-register');
 require('babel-polyfill');
 
 module.exports = {
+    solc: {
+        optimizer: {
+            enabled: true,
+            runs: 500
+        }
+    },
     networks: {
         development: {
             host: "localhost",
             port: 8444,
             network_id: "*", // Match any network id
+            gas: "47e5",
             gasPrice: "21000000000"
         },
         live: {
