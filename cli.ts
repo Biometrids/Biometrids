@@ -4,7 +4,7 @@ import fs = require('fs');
 import net = require('net');
 import path = require('path');
 // import moment = require('moment');
-import {Strings, toIcoStateIdToName} from './lib/utils';
+import {Strings, toIcoStateIdToName, toRefundVaultStateIdToName} from './lib/utils';
 import * as Web3 from 'web3';
 import {address, IContract, ISimpleCallable} from './globals';
 import {
@@ -295,6 +295,65 @@ handlers['deploy'] = async () => {
     console.log("Biometrids CrowdSale successfully deployed");
 };
 
+handlers['info'] = async () => {
+    await checkEthNetwork();
+    const wcmd = ctx.cmdOpts.shift();
+    switch (wcmd) {
+        case 'token':
+            failIfNotDeployed('BiometridsToken');
+            const token = ctx.BiometridsToken.instance;
+            const tdata = {
+                'token': {
+                    address: token.address,
+                    owner: await token.owner.call(),
+                    symbol: await token.symbol.call(),
+                    totalSupply: await token.totalSupply.call(),
+                    decimals: await token.decimals.call(),
+                }
+            };
+            console.log(JSON.stringify(tdata, null, 2));
+            break;
+        case 'refund-vault':
+            failIfNotDeployed('CrowdSaleRefundVault');
+            const refundVault = ctx.CrowdSaleRefundVault.instance;
+            const rfdata = {
+                'refund-vault': {
+                    address: refundVault.address,
+                    owner: await refundVault.owner.call(),
+                    wallet: await refundVault.wallet.call(),
+                    state: toRefundVaultStateIdToName(await refundVault.state.call() as any),
+                }
+            };
+            console.log(JSON.stringify(rfdata, null, 2));
+            break;
+        case 'crowdsale':
+            failIfNotDeployed('CrowdSale');
+            const ico = ctx.CrowdSale.instance;
+            const idata = {
+                'crowdsale': {
+                    address: ico.address,
+                    owner: await ico.owner.call(),
+                    wallet: await ico.wallet.call(),
+                    state: toIcoStateIdToName(await ico.status.call() as any),
+                    token: await ico.token.call(),
+                    refundVault: await ico.refundVault.call(),
+                    pricingStrategy: await ico.pricingStrategy.call(),
+                    softCapWei: await ico.weiSoftCap.call(),
+                    hardCapWei: await ico.weiHardCap.call(),
+                    icoFinalizedTimestamp: await ico.icoFinalizedTimestamp.call(),
+                    icoStartedTimestamp: await ico.icoStartedTimestamp.call(),
+                    totalWeiRaised: await ico.totalWeiRaised.call(),
+                    totalTokensSold: await ico.totalTokensSold.call(),
+                    investorCount: await ico.investorCount.call(),
+                }
+            };
+            console.log(JSON.stringify(idata, null, 2));
+            break;
+        default:
+            console.log(`Unknown option: \'${wcmd}\'. type --help to show command syntax.`);
+    }
+};
+
 handlers['status'] = async () => {
     await checkEthNetwork();
     failIfNotDeployed();
@@ -413,7 +472,7 @@ handlers['wl'] = async () => {
             const content = fs.readFileSync(fileName).toString('utf8');
             let lines = content.split('\n');
 
-            while(lines.length  > 0) {
+            while (lines.length > 0) {
                 const addr = lines.shift().trim();
                 if (addr == '') {
                     continue;
@@ -482,6 +541,9 @@ function usage(error?: string): never {
         '\nCommands:' +
         '\n\tdeploy                         - Deploy BiometridsCrowdSale smart contracts' +
         '\n\tstatus                         - Get contracts status' +
+        '\n\tinfo token                     - Print Biometrids contract info' +
+        '\n\tinfo refund-vault              - Print RefundVault contract info' +
+        '\n\tinfo crowdsale                 - Print CrowdSale contract info' +
         '\n\tico start                      - Start ICO' +
         '\n\tico finalize                   - Finish ICO' +
         '\n\ttoken balance <addr>           - Check token balance for <addr>' +

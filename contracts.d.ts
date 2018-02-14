@@ -27,6 +27,12 @@ declare const enum ICOState {
     Failed = 3
 }
 
+declare const enum RefundVaultState {
+    Active = 0,
+    Refunding = 1,
+    Closed = 2
+}
+
 interface IOwnable {
     owner: ISimpleCallable<address>;
 
@@ -160,6 +166,9 @@ interface ICrowdSale extends IContractInstance, IOnlyAllowedAddresses, IWhitelis
 }
 
 interface ICrowdSaleRefundVault extends IContractInstance, IOnlyAllowedAddresses {
+    wallet: ISimpleCallable<address>;
+    state: ISimpleCallable<number>;
+
     allowAddress(adress: string, allow: boolean): Promise<any>
 }
 
